@@ -4,8 +4,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "init-db": "node init-db.js"
   },
+
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -15,6 +17,7 @@
     "@fastify/static": "7.0.4",
     "fastify": "4.28.1",
     "pino-pretty": "11.2.2",
-    "promised-sqlite3": "2.1.0"
+    "promised-sqlite3": "2.1.0",
+    "sqlite3": "^5.1.7"
   }
 }
