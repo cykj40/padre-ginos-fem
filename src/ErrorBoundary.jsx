@@ -1,11 +1,12 @@
 import { Component } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
+
 class ErrorBoundary extends Component {
     state = {
         hasError: false,
     }
 
-    static getDerivedStateFromError(error) {
+    static getDerivedStateFromError() {
         return { hasError: true };
     }
 
