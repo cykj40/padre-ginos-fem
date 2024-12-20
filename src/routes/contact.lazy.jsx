@@ -2,7 +2,15 @@ import { createLazyFileRoute } from '@tanstack/react-router'
 import { useMutation } from '@tanstack/react-query'
 import postContact from '../api/postContact'
 
-
+function ContactInput({ type, name, placeholder }) {
+  return (
+    <input
+      type={type}
+      name={name}
+      placeholder={placeholder}
+    />
+  )
+}
 
 export const Route = createLazyFileRoute('/contact')({
   component: ContactRoute,
@@ -10,10 +18,8 @@ export const Route = createLazyFileRoute('/contact')({
 
 function ContactRoute() {
   const mutation = useMutation({
-    mutationFn: function (e) {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      return postContact(
+    mutationFn: function (formData) {
+       return postContact( 
         formData.get('name'),
         formData.get('email'),
         formData.get('message')
@@ -26,13 +32,13 @@ function ContactRoute() {
       {mutation.isSuccess ? (
         <h3>Message sent!</h3>
       ) : (
-        <form onSubmit={mutation.mutate}>
-          <input type="text" name="name" placeholder="Name" />
-          <input type="email" name="email" placeholder="Email" />
+        <form action={mutation.mutate}>
+          <ContactInput type="text" name="name" placeholder="Name" />
+          <ContactInput type="email" name="email" placeholder="Email" />
           <textarea name="message" placeholder="Message" />
           <button type="submit">Send</button>
         </form>
       )}
     </div>
-  )
+  );
 }

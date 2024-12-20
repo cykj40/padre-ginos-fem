@@ -42,9 +42,7 @@ export default function Order() {
     );
   }
 
-  useEffect(() => {
-    fetchPizzaTypes();
-  }, []);
+ 
 
   async function fetchPizzaTypes() {
     const pizzasRes = await fetch("/api/pizzas");
@@ -53,13 +51,19 @@ export default function Order() {
     setLoading(false);
   }
 
+   useEffect(() => {
+    fetchPizzaTypes();
+   }, []);
+  
+  function addToCart(e) {
+    e.preventDefault();
+    setCart([...cart, { pizza:selectedPizza, size:pizzaSize, price }]);
+  }
+
   return (
     <div className="order">
       <h2>Create Order</h2>
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        setCart([...cart, { pizza:selectedPizza, size:pizzaSize, price }]);
-      }}>
+      <form action={addToCart}>
         <div>
           <div>
             <label htmlFor="pizza-type">Pizza Type</label>
