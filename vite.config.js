@@ -11,12 +11,12 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://localhost:3000",
+        target: "https://padre-ginos-api.vercel.app",
         changeOrigin: true,
         secure: false
       },
       "/public": {
-        target: "http://localhost:3000",
+        target: "https://padre-ginos-api.vercel.app",
         changeOrigin: true,
         secure: false
       }
