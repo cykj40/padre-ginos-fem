@@ -15,9 +15,12 @@ function Menu() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('API URL:', import.meta.env.VITE_API_URL);
     async function fetchPizzas() {
-      const response = await fetch("/api/pizzas");
+      console.log('Fetching from:', `${import.meta.env.VITE_API_URL}/api/pizzas`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pizzas`);
       const data = await response.json();
+      console.log('Pizza data:', data);
       setPizzas(data);
       setLoading(false);
     }
