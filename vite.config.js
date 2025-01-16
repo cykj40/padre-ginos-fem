@@ -11,12 +11,12 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "https://padre-ginos-api-git-main-cykj40s-projects.vercel.app",
+        target: "https://padre-ginos-api-git-main-cykj40s-projects.vercel.app/",
         changeOrigin: true,
         secure: false
       },
       "/public": {
-        target: "https://padre-ginos-api-git-main-cykj40s-projects.vercel.app",
+        target: "https://padre-ginos-api-git-main-cykj40s-projects.vercel.app/",
         changeOrigin: true,
         secure: false
       }

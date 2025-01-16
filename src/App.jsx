@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 
 const router = createRouter({ routeTree });
 const queryClient = new QueryClient({
@@ -18,3 +19,16 @@ root.render(
     <RouterProvider router={router} />
   </QueryClientProvider>
 );
+
+useEffect(() => {
+  console.log('API URL:', import.meta.env.VITE_API_URL);
+  async function fetchPizzas() {
+    console.log('Fetching from:', `${import.meta.env.VITE_API_URL}/api/pizzas`);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pizzas`);
+    const data = await response.json();
+    console.log('Pizza data:', data);
+    setPizzas(data);
+    setLoading(false);
+  }
+  fetchPizzas();
+}, []);
