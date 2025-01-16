@@ -1,28 +1,23 @@
 import { useState, useEffect } from 'react';
 import { createLazyFileRoute } from "@tanstack/react-router";
 
+const intl = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+});
+
 function Menu() {
   const [pizzas, setPizzas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('API URL:', import.meta.env.VITE_API_URL);
     async function fetchPizzas() {
-      console.log('Fetching from:', `${import.meta.env.VITE_API_URL}/api/pizzas`);
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pizzas`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new TypeError("Oops, we haven't got JSON!");
-        }
         const data = await response.json();
-        console.log('Pizza data:', data);
         setPizzas(data);
       } catch (error) {
-        console.error('Error fetching pizzas:', error);
+        console.error('Error:', error);
       } finally {
         setLoading(false);
       }
@@ -51,7 +46,7 @@ function Menu() {
   );
 }
 
-export const Route = createLazyFileRoute("/menu")({
+export const Route = createLazyFileRoute('/menu')({
   component: Menu
 });
 
