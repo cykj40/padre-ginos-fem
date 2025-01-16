@@ -1,15 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createLazyFileRoute } from "@tanstack/react-router";
 
-export const Route = createLazyFileRoute("/menu")({
-  component: Menu,
-});
-
-const intl = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
-
 function Menu() {
   const [pizzas, setPizzas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,5 +50,9 @@ function Menu() {
     </div>
   );
 }
+
+export const Route = createLazyFileRoute("/menu")({
+  component: Menu
+});
 
 export default Menu; 
