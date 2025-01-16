@@ -13,13 +13,19 @@ export default defineConfig({
       "/api": {
         target: "https://padre-ginos-api-git-main-cykj40s-projects.vercel.app/",
         changeOrigin: true,
-        secure: false
+        secure: false,
+        headers: {
+          'Access-Control-Allow-Origin': '*'
+        }
       },
       "/public": {
         target: "https://padre-ginos-api-git-main-cykj40s-projects.vercel.app/",
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/public/, '')
+        rewrite: (path) => path.replace(/^\/public/, ''),
+        headers: {
+          'Access-Control-Allow-Origin': '*'
+        }
       }
     }
   },
