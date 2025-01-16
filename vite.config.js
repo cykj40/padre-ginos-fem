@@ -22,18 +22,10 @@ export default defineConfig({
       }
     }
   },
-  plugins: [react({
-    babel: {
-      plugins: [
-        [
-          "babel-plugin-react-compiler",
-          {
-            target: "19"
-          }
-        ]
-      ]
-    }
-  }), TanStackRouterVite()],
+  plugins: [
+    react(),
+    TanStackRouterVite()
+  ],
   test: {
 
     environment: "happy-dom",
