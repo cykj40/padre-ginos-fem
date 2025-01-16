@@ -18,7 +18,8 @@ export default defineConfig({
       "/public": {
         target: "https://padre-ginos-api-git-main-cykj40s-projects.vercel.app/",
         changeOrigin: true,
-        secure: false
+        secure: false,
+        rewrite: (path) => path.replace(/^\/public/, '')
       }
     }
   },
