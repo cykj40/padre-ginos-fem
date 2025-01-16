@@ -6,14 +6,14 @@ const intl = new Intl.NumberFormat("en-US", {
   currency: "USD",
 });
 
-function Menu() {
+const Menu = () => {
   const [pizzas, setPizzas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
     
-    async function fetchPizzas() {
+    const fetchPizzas = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pizzas`);
         const data = await response.json();
@@ -27,7 +27,7 @@ function Menu() {
           setLoading(false);
         }
       }
-    }
+    };
     
     fetchPizzas();
     return () => { mounted = false; };
@@ -52,7 +52,7 @@ function Menu() {
       </div>
     </div>
   );
-}
+};
 
 export const Route = createFileRoute('/menu')({
   component: Menu
