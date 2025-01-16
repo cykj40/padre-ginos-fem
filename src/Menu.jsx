@@ -6,23 +6,31 @@ const intl = new Intl.NumberFormat("en-US", {
   currency: "USD",
 });
 
-export function Menu() {
+function Menu() {
   const [pizzas, setPizzas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+    
     async function fetchPizzas() {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pizzas`);
         const data = await response.json();
-        setPizzas(data);
+        if (mounted) {
+          setPizzas(data);
+        }
       } catch (error) {
         console.error('Error:', error);
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
+    
     fetchPizzas();
+    return () => { mounted = false; };
   }, []);
 
   if (loading) return <h2>Loading Menu...</h2>;
