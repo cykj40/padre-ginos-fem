@@ -4,3 +4,7 @@ node_modules/
 *.sqlite-journal
 dist/
 .turso/
+.env.production
+.env.development
+.env.test
+```
