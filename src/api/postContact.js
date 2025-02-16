@@ -1,14 +1,17 @@
-export default async function postContact(name, email, message) {
-    const response = await fetch('/api/contact', {
+import { getFullUrl } from './config';
+
+export default async function postContact({ name, email, message }) {
+    const response = await fetch(getFullUrl('/api/contact'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, message }),
+        body: JSON.stringify({
+            name,
+            email,
+            message,
+        }),
     });
-
-    if (!response.ok) {
-        throw new Error("Network response was not ok");
-    }
-    return response.json();
+    const data = await response.json();
+    return data;
 }
