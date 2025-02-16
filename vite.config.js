@@ -12,6 +12,31 @@ export default defineConfig(({ mode }) => ({
         target: "http://localhost:3000",
         changeOrigin: true,
         secure: false
+      },
+      "/public": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        secure: false
+      },
+      "/style.css": {
+        target: "http://localhost:3000/public",
+        changeOrigin: true,
+        secure: false
+      },
+      "/padre_gino.svg": {
+        target: "http://localhost:3000/public",
+        changeOrigin: true,
+        secure: false
+      },
+      "/Pacifico-Regular.ttf": {
+        target: "http://localhost:3000/public",
+        changeOrigin: true,
+        secure: false
+      },
+      "/pizzas": {
+        target: "http://localhost:3000/public",
+        changeOrigin: true,
+        secure: false
       }
     } : {}
   },
