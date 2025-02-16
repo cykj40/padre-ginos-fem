@@ -55,7 +55,7 @@ export default defineConfig(({ mode }) => ({
   define: {
     'process.env.VITE_API_URL': JSON.stringify(mode === 'production'
       ? 'https://padre-ginos-fem.onrender.com/'
-      : 'http://localhost:3000/'
+      : ''
     )
   },
   plugins: [
@@ -68,7 +68,7 @@ export default defineConfig(({ mode }) => ({
           /%VITE_API_URL%/g,
           mode === 'production'
             ? 'https://padre-ginos-fem.onrender.com/'
-            : '/'
+            : ''
         )
       }
     }
