@@ -1,7 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App'
-import { router } from '@tanstack/react-router'
+import App, { router } from './App'
 
 // Wait for the router to be ready before rendering
 await router.load()
