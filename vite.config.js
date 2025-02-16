@@ -58,18 +58,7 @@ export default defineConfig(({ mode }) => ({
       : 'http://localhost:3000'
     )
   },
-  plugins: [react({
-    babel: {
-      plugins: [
-        [
-          "babel-plugin-react-compiler",
-          {
-            target: "19"
-          }
-        ]
-      ]
-    }
-  }), TanStackRouterVite()],
+  plugins: [react(), TanStackRouterVite()],
   test: {
     environment: "happy-dom",
     coverage: {
