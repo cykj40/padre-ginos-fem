@@ -3,22 +3,17 @@ import react from '@vitejs/plugin-react'
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   // set api location
   server: {
     port: 5173,
-    proxy: {
+    proxy: mode === 'development' ? {
       "/api": {
         target: "http://localhost:3000",
         changeOrigin: true,
         secure: false
-      },
-      "/public": {
-        target: "http://localhost:3000",
-        changeOrigin: true,
-        secure: false
       }
-    }
+    } : {}
   },
   build: {
     outDir: 'dist',
@@ -31,6 +26,12 @@ export default defineConfig({
         }
       }
     }
+  },
+  define: {
+    'process.env.VITE_API_URL': JSON.stringify(mode === 'production'
+      ? 'https://padre-ginos-fem.onrender.com'
+      : 'http://localhost:3000'
+    )
   },
   plugins: [react({
     babel: {
@@ -51,4 +52,4 @@ export default defineConfig({
       reporter: ["text", "json", "html"],
     },
   },
-})
+}))
