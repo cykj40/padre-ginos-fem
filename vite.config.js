@@ -54,11 +54,25 @@ export default defineConfig(({ mode }) => ({
   },
   define: {
     'process.env.VITE_API_URL': JSON.stringify(mode === 'production'
-      ? 'https://padre-ginos-fem.onrender.com'
-      : 'http://localhost:3000'
+      ? 'https://padre-ginos-fem.onrender.com/'
+      : 'http://localhost:3000/'
     )
   },
-  plugins: [react(), TanStackRouterVite()],
+  plugins: [
+    react(),
+    TanStackRouterVite(),
+    {
+      name: 'html-transform',
+      transformIndexHtml(html) {
+        return html.replace(
+          /%VITE_API_URL%/g,
+          mode === 'production'
+            ? 'https://padre-ginos-fem.onrender.com/'
+            : '/'
+        )
+      }
+    }
+  ],
   test: {
     environment: "happy-dom",
     coverage: {
