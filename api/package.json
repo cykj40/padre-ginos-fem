@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "init-db": "node init-db.js"
+    "init-db": "node init-db.js",
+    "build": "npm install && npm run init-db"
   },
   "keywords": [],
   "author": "",
@@ -13,12 +14,11 @@
   "type": "module",
   "description": "",
   "dependencies": {
+    "@fastify/cors": "^10.0.2",
     "@fastify/static": "7.0.4",
     "@libsql/client": "^0.14.0",
     "dotenv": "^16.4.7",
     "fastify": "4.28.1",
-    "pino-pretty": "11.2.2",
-    "promised-sqlite3": "2.1.0",
-    "sqlite3": "^5.1.7"
+    "pino-pretty": "11.2.2"
   }
 }

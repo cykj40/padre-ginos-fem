@@ -2,79 +2,137 @@ import fastify from "fastify";
 import fastifyStatic from "@fastify/static";
 import path from "path";
 import { fileURLToPath } from "url";
-import { AsyncDatabase } from "promised-sqlite3";
+import cors from "@fastify/cors";
+import client from './db.js';
 
 const server = fastify({
     logger: {
-        transport: {
-            target: "pino-pretty",
-        },
+        level: process.env.NODE_ENV === 'production' ? 'warn' : 'info',
+        transport: process.env.NODE_ENV === 'production'
+            ? undefined
+            : {
+                target: "pino-pretty",
+            },
     },
+    trustProxy: true,
+    ajv: {
+        customOptions: {
+            removeAdditional: 'all',
+            coerceTypes: true,
+            useDefaults: true,
+        }
+    }
+});
+
+// Register CORS
+server.register(cors, {
+    origin: process.env.CORS_ORIGIN || '*',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
 });
 
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const db = await AsyncDatabase.open("./pizza.sqlite");
-
+// Rate limiting for static files
 server.register(fastifyStatic, {
     root: path.join(__dirname, "public"),
     prefix: "/public/",
+    maxAge: process.env.NODE_ENV === 'production' ? 86400000 : 0, // 1 day cache in production
+});
+
+// Input validation schema for order
+const orderSchema = {
+    body: {
+        type: 'object',
+        required: ['cart'],
+        properties: {
+            cart: {
+                type: 'array',
+                minItems: 1,
+                items: {
+                    type: 'object',
+                    required: ['pizza', 'size'],
+                    properties: {
+                        pizza: {
+                            type: 'object',
+                            required: ['id'],
+                            properties: {
+                                id: { type: 'number' }
+                            }
+                        },
+                        size: { type: 'string' }
+                    }
+                }
+            }
+        }
+    }
+};
+
+// Health check endpoint
+server.get("/health", async (req, res) => {
+    try {
+        await client.execute("SELECT 1");
+        return { status: "healthy" };
+    } catch (err) {
+        res.status(500).send({ status: "unhealthy", message: err.message });
+    }
 });
 
 server.get("/api/pizzas", async function getPizzas(req, res) {
-    const pizzasPromise = db.all(
-        "SELECT pizza_type_id, name, category, ingredients as description FROM pizza_types"
-    );
-    const pizzaSizesPromise = db.all(
-        `SELECT 
-      pizza_type_id as id, size, price
-    FROM 
-      pizzas
-  `
-    );
+    try {
+        const pizzasResult = await client.execute(
+            "SELECT pizza_type_id, name, category, ingredients as description FROM pizza_types"
+        );
+        const pizzaSizesResult = await client.execute(
+            `SELECT pizza_type_id as id, size, price FROM pizzas`
+        );
 
-    const [pizzas, pizzaSizes] = await Promise.all([
-        pizzasPromise,
-        pizzaSizesPromise,
-    ]);
+        const pizzas = pizzasResult.rows;
+        const pizzaSizes = pizzaSizesResult.rows;
 
-    const responsePizzas = pizzas.map((pizza) => {
-        const sizes = pizzaSizes.reduce((acc, current) => {
-            if (current.id === pizza.pizza_type_id) {
-                acc[current.size] = +current.price;
-            }
-            return acc;
-        }, {});
-        return {
+        const responsePizzas = pizzas.map((pizza) => {
+            const sizes = pizzaSizes.reduce((acc, current) => {
+                if (current.id === pizza.pizza_type_id) {
+                    acc[current.size] = +current.price;
+                }
+                return acc;
+            }, {});
+            return {
+                id: pizza.pizza_type_id,
+                name: pizza.name,
+                category: pizza.category,
+                description: pizza.description,
+                image: `/public/pizzas/${pizza.pizza_type_id}.webp`,
+                sizes,
+            };
+        });
 
-            id: pizza.pizza_type_id,
-            name: pizza.name,
-            category: pizza.category,
-            description: pizza.description,
-            image: `/public/pizzas/${pizza.pizza_type_id}.webp`,
-            sizes,
-        };
-    });
-
-    res.send(responsePizzas);
+        res.send(responsePizzas);
+    } catch (error) {
+        req.log.error(error);
+        res.status(500).send({ error: "Failed to fetch pizzas" });
+    }
 });
 
 server.get("/api/pizza-of-the-day", async function getPizzaOfTheDay(req, res) {
-    const pizzas = await db.all(
+    const pizzasResult = await client.execute(
         `SELECT 
       pizza_type_id as id, name, category, ingredients as description
     FROM 
       pizza_types`
     );
 
+    const pizzas = pizzasResult.rows;
+
     const daysSinceEpoch = Math.floor(Date.now() / 86400000);
     const pizzaIndex = daysSinceEpoch % pizzas.length;
     const pizza = pizzas[pizzaIndex];
 
-    const sizes = await db.all(
+    const pizzaSizesResult = await client.execute(
         `SELECT
       size, price
     FROM
@@ -84,7 +142,9 @@ server.get("/api/pizza-of-the-day", async function getPizzaOfTheDay(req, res) {
         [pizza.id]
     );
 
-    const sizeObj = sizes.reduce((acc, current) => {
+    const pizzaSizes = pizzaSizesResult.rows;
+
+    const sizeObj = pizzaSizes.reduce((acc, current) => {
         acc[current.size] = +current.price;
         return acc;
     }, {});
@@ -102,18 +162,20 @@ server.get("/api/pizza-of-the-day", async function getPizzaOfTheDay(req, res) {
 });
 
 server.get("/api/orders", async function getOrders(req, res) {
-    const orders = await db.all("SELECT order_id, date, time FROM orders");
+    const ordersResult = await client.execute("SELECT order_id, date, time FROM orders");
+
+    const orders = ordersResult.rows;
 
     res.send(orders);
 });
 
 server.get("/api/order", async function getOrders(req, res) {
     const id = req.query.id;
-    const orderPromise = db.get(
+    const orderResult = await client.execute(
         "SELECT order_id, date, time FROM orders WHERE order_id = ?",
         [id]
     );
-    const orderItemsPromise = db.all(
+    const orderItemsResult = await client.execute(
         `SELECT 
       t.pizza_type_id as pizzaTypeId, t.name, t.category, t.ingredients as description, o.quantity, p.price, o.quantity * p.price as total, p.size
     FROM 
@@ -132,11 +194,11 @@ server.get("/api/order", async function getOrders(req, res) {
     );
 
     const [order, orderItemsRes] = await Promise.all([
-        orderPromise,
-        orderItemsPromise,
+        orderResult,
+        orderItemsResult,
     ]);
 
-    const orderItems = orderItemsRes.map((item) =>
+    const orderItems = orderItemsRes.rows.map((item) =>
         Object.assign({}, item, {
             image: `/public/pizzas/${item.pizzaTypeId}.webp`,
             quantity: +item.quantity,
@@ -152,73 +214,75 @@ server.get("/api/order", async function getOrders(req, res) {
     });
 });
 
-server.post("/api/order", async function createOrder(req, res) {
-    const { cart } = req.body;
+server.post("/api/order", {
+    schema: orderSchema,
+    handler: async function createOrder(req, res) {
+        const { cart } = req.body;
 
-    const now = new Date();
-    // forgive me Date gods, for I have sinned
-    const time = now.toLocaleTimeString("en-US", { hour12: false });
-    const date = now.toISOString().split("T")[0];
+        const now = new Date();
+        const time = now.toLocaleTimeString("en-US", { hour12: false });
+        const date = now.toISOString().split("T")[0];
 
-    if (!cart || !Array.isArray(cart) || cart.length === 0) {
-        res.status(400).send({ error: "Invalid order data" });
-        return;
-    }
-
-    try {
-        await db.run("BEGIN TRANSACTION");
-
-        const result = await db.run(
-            "INSERT INTO orders (date, time) VALUES (?, ?)",
-            [date, time]
-        );
-        const orderId = result.lastID;
-
-        const mergedCart = cart.reduce((acc, item) => {
-            const id = item.pizza.id;
-            const size = item.size.toLowerCase();
-            if (!id || !size) {
-                throw new Error("Invalid item data");
-            }
-            const pizzaId = `${id}_${size}`;
-
-            if (!acc[pizzaId]) {
-                acc[pizzaId] = { pizzaId, quantity: 1 };
-            } else {
-                acc[pizzaId].quantity += 1;
-            }
-
-            return acc;
-        }, {});
-
-        for (const item of Object.values(mergedCart)) {
-            const { pizzaId, quantity } = item;
-            await db.run(
-                "INSERT INTO order_details (order_id, pizza_id, quantity) VALUES (?, ?, ?)",
-                [orderId, pizzaId, quantity]
-            );
+        if (!cart || !Array.isArray(cart) || cart.length === 0) {
+            res.status(400).send({ error: "Invalid order data" });
+            return;
         }
 
-        await db.run("COMMIT");
+        try {
+            await client.execute("BEGIN TRANSACTION");
 
-        res.send({ orderId });
-    } catch (error) {
-        req.log.error(error);
-        await db.run("ROLLBACK");
-        res.status(500).send({ error: "Failed to create order" });
+            const result = await client.execute(
+                "INSERT INTO orders (date, time) VALUES (?, ?)",
+                [date, time]
+            );
+            const orderId = result.lastID;
+
+            const mergedCart = cart.reduce((acc, item) => {
+                const id = item.pizza.id;
+                const size = item.size.toLowerCase();
+                if (!id || !size) {
+                    throw new Error("Invalid item data");
+                }
+                const pizzaId = `${id}_${size}`;
+
+                if (!acc[pizzaId]) {
+                    acc[pizzaId] = { pizzaId, quantity: 1 };
+                } else {
+                    acc[pizzaId].quantity += 1;
+                }
+
+                return acc;
+            }, {});
+
+            for (const item of Object.values(mergedCart)) {
+                const { pizzaId, quantity } = item;
+                await client.execute(
+                    "INSERT INTO order_details (order_id, pizza_id, quantity) VALUES (?, ?, ?)",
+                    [orderId, pizzaId, quantity]
+                );
+            }
+
+            await client.execute("COMMIT");
+
+            res.send({ orderId });
+        } catch (error) {
+            req.log.error(error);
+            await client.execute("ROLLBACK");
+            res.status(500).send({ error: "Failed to create order" });
+        }
     }
 });
 
 server.get("/api/past-orders", async function getPastOrders(req, res) {
-    await new Promise((resolve) => setTimeout(resolve, 5000));
     try {
         const page = parseInt(req.query.page, 10) || 1;
         const limit = 20;
         const offset = (page - 1) * limit;
-        const pastOrders = await db.all(
-            "SELECT order_id, date, time FROM orders ORDER BY order_id DESC LIMIT 10 OFFSET ?",
-            [offset]
+        const pastOrdersResult = await client.execute(
+            "SELECT order_id, date, time FROM orders ORDER BY order_id DESC LIMIT ? OFFSET ?",
+            [limit, offset]
         );
+        const pastOrders = pastOrdersResult.rows;
         res.send(pastOrders);
     } catch (error) {
         req.log.error(error);
@@ -230,17 +294,19 @@ server.get("/api/past-order/:order_id", async function getPastOrder(req, res) {
     const orderId = req.params.order_id;
 
     try {
-        const order = await db.get(
+        const orderResult = await client.execute(
             "SELECT order_id, date, time FROM orders WHERE order_id = ?",
             [orderId]
         );
+
+        const order = orderResult.rows[0];
 
         if (!order) {
             res.status(404).send({ error: "Order not found" });
             return;
         }
 
-        const orderItems = await db.all(
+        const orderItemsResult = await client.execute(
             `SELECT 
         t.pizza_type_id as pizzaTypeId, t.name, t.category, t.ingredients as description, o.quantity, p.price, o.quantity * p.price as total, p.size
       FROM 
@@ -258,7 +324,7 @@ server.get("/api/past-order/:order_id", async function getPastOrder(req, res) {
             [orderId]
         );
 
-        const formattedOrderItems = orderItems.map((item) =>
+        const orderItems = orderItemsResult.rows.map((item) =>
             Object.assign({}, item, {
                 image: `/public/pizzas/${item.pizzaTypeId}.webp`,
                 quantity: +item.quantity,
@@ -266,14 +332,14 @@ server.get("/api/past-order/:order_id", async function getPastOrder(req, res) {
             })
         );
 
-        const total = formattedOrderItems.reduce(
+        const total = orderItems.reduce(
             (acc, item) => acc + item.total,
             0
         );
 
         res.send({
             order: Object.assign({ total }, order),
-            orderItems: formattedOrderItems,
+            orderItems: orderItems,
         });
     } catch (error) {
         req.log.error(error);
@@ -298,10 +364,34 @@ server.post("/api/contact", async function contactForm(req, res) {
     res.send({ success: "Message received" });
 });
 
+// Error handler
+server.setErrorHandler((error, request, reply) => {
+    request.log.error(error);
+    if (process.env.NODE_ENV === 'production') {
+        // Don't send error details in production
+        reply.status(500).send({ error: 'Internal Server Error' });
+    } else {
+        reply.status(500).send({ error: error.message });
+    }
+});
+
+// Graceful shutdown
+const closeGracefully = async (signal) => {
+    console.log(`Received signal to terminate: ${signal}`);
+    await server.close();
+    process.exit(0);
+};
+
+process.on('SIGINT', closeGracefully);
+process.on('SIGTERM', closeGracefully);
+
 const start = async () => {
     try {
-        await server.listen({ port: PORT });
-        console.log(`Server listening on port ${PORT}`);
+        await server.listen({
+            port: PORT,
+            host: HOST
+        });
+        console.log(`Server listening on ${HOST}:${PORT}`);
     } catch (err) {
         console.error(err);
         process.exit(1);
