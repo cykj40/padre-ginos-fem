@@ -14,7 +14,7 @@
   "type": "module",
   "description": "",
   "dependencies": {
-    "@fastify/cors": "^10.0.2",
+    "@fastify/cors": "^8.4.1",
     "@fastify/static": "7.0.4",
     "@libsql/client": "^0.14.0",
     "dotenv": "^16.4.7",
