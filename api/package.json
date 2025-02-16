@@ -1,11 +1,11 @@
 {
   "name": "api",
   "version": "1.0.0",
-  "main": "api/server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node api/server.js",
-    "dev": "node --watch api/server.js",
-    "init-db": "node api/init-db.js",
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "init-db": "node init-db.js",
     "build": "npm install && npm run init-db"
   },
   "keywords": [],
