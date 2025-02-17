@@ -42,6 +42,7 @@ server.register(fastifyStatic, {
     root: path.join(__dirname, "public"),
     prefix: "/public/",
     maxAge: process.env.NODE_ENV === 'production' ? 86400000 : 0, // 1 day cache in production
+    decorateReply: false // Important for Vercel deployment
 });
 
 // Input validation schema for order

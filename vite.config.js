@@ -16,27 +16,6 @@ export default defineConfig(({ mode }) => ({
       "/public": {
         target: "http://localhost:3000",
         changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path
-      },
-      "/style.css": {
-        target: "http://localhost:3000/public",
-        changeOrigin: true,
-        secure: false
-      },
-      "/padre_gino.svg": {
-        target: "http://localhost:3000/public",
-        changeOrigin: true,
-        secure: false
-      },
-      "/Pacifico-Regular.ttf": {
-        target: "http://localhost:3000/public",
-        changeOrigin: true,
-        secure: false
-      },
-      "/pizzas": {
-        target: "http://localhost:3000/public",
-        changeOrigin: true,
         secure: false
       }
     } : {}
@@ -55,24 +34,13 @@ export default defineConfig(({ mode }) => ({
   },
   define: {
     'process.env.VITE_API_URL': JSON.stringify(mode === 'production'
-      ? 'https://padre-ginos-fem.onrender.com/'
-      : ''
+      ? 'https://padre-ginos-fem.onrender.com'
+      : 'http://localhost:3000'
     )
   },
   plugins: [
     react(),
-    TanStackRouterVite(),
-    {
-      name: 'html-transform',
-      transformIndexHtml(html) {
-        return html.replace(
-          /%VITE_API_URL%/g,
-          mode === 'production'
-            ? 'https://padre-ginos-fem.onrender.com/'
-            : ''
-        )
-      }
-    }
+    TanStackRouterVite()
   ],
   test: {
     environment: "happy-dom",
