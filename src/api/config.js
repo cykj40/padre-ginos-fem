@@ -11,15 +11,16 @@ export function getImageUrl(path) {
     if (path.startsWith('http')) return path;
 
     // Remove /public prefix if it exists
-    const cleanPath = path.startsWith('/public/') ? path.slice(8) : path;
+    const cleanPath = path.startsWith('/public/') ? path.slice(7) : path;
 
     // In production, use the full API URL
     if (import.meta.env.PROD) {
-        return `${API_URL}public/${cleanPath}`;
+        // Make sure we don't double up on slashes
+        return `${API_URL.replace(/\/$/, '')}/public/${cleanPath.replace(/^\//, '')}`;
     }
 
     // In development, keep the /public prefix
-    return `/public/${cleanPath}`;
+    return path.startsWith('/public/') ? path : `/public/${path}`;
 }
 
 export async function fetchApi(path, options = {}) {

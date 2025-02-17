@@ -16,7 +16,8 @@ export default defineConfig(({ mode }) => ({
       "/public": {
         target: "http://localhost:3000",
         changeOrigin: true,
-        secure: false
+        secure: false,
+        rewrite: (path) => path
       },
       "/style.css": {
         target: "http://localhost:3000/public",
