@@ -41,10 +41,25 @@ const server = fastify({
 
 // Register CORS
 server.register(cors, {
-    origin: true, // Allow all origins
+    origin: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
+});
+
+// Add root route handler
+server.get('/', async (request, reply) => {
+    return {
+        status: 'ok',
+        message: 'Padre Gino\'s Pizza API',
+        endpoints: {
+            pizzas: '/api/pizzas',
+            pizzaOfTheDay: '/api/pizza-of-the-day',
+            orders: '/api/orders',
+            pastOrders: '/api/past-orders',
+            contact: '/api/contact'
+        }
+    };
 });
 
 const PORT = process.env.PORT || 3000;
