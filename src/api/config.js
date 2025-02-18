@@ -14,11 +14,6 @@ export function getImageUrl(path) {
     const cleanPath = path.startsWith('/public/') ? path.slice(7) : path;
 
     // Always use the full API URL for images
-    if (path.includes('pizzas/')) {
-        // For pizza images, use the ID-based naming
-        const pizzaId = path.split('/').pop().split('.')[0];
-        return `${API_URL}/public/pizzas/${pizzaId}.webp`;
-    }
     return `${API_URL}/public/${cleanPath}`;
 }
 

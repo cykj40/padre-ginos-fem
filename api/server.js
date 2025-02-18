@@ -5,6 +5,21 @@ import { fileURLToPath } from "url";
 import cors from "@fastify/cors";
 import client from './db.js';
 
+// Pizza image filename mapping
+const PIZZA_IMAGE_NAMES = {
+    1: 'big-meat',
+    2: 'greek',
+    3: 'hawaiian',
+    4: 'mediterraneo',
+    5: 'mexican',
+    6: 'napolitana',
+    7: 'pepperoni',
+    8: 'sicilian',
+    9: 'spinach',
+    10: 'thai',
+    11: 'veggie'
+};
+
 const server = fastify({
     logger: {
         level: process.env.NODE_ENV === 'production' ? 'warn' : 'info',
@@ -107,7 +122,7 @@ server.get("/api/pizzas", async function getPizzas(req, res) {
                 name: pizza.name,
                 category: pizza.category,
                 description: pizza.description,
-                image: `/public/pizzas/${pizza.pizza_type_id}.webp`,
+                image: `/public/pizzas/${PIZZA_IMAGE_NAMES[pizza.pizza_type_id]}.webp`,
                 sizes,
             };
         });
@@ -155,7 +170,7 @@ server.get("/api/pizza-of-the-day", async function getPizzaOfTheDay(req, res) {
         name: pizza.name,
         category: pizza.category,
         description: pizza.description,
-        image: `/public/pizzas/${pizza.id}.webp`,
+        image: `/public/pizzas/${PIZZA_IMAGE_NAMES[pizza.id]}.webp`,
         sizes: sizeObj,
     };
 
