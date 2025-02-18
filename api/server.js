@@ -41,9 +41,10 @@ const server = fastify({
 
 // Register CORS
 server.register(cors, {
-    origin: process.env.CORS_ORIGIN || '*',
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type'],
+    origin: true, // Allow all origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 });
 
 const PORT = process.env.PORT || 3000;
