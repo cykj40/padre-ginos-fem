@@ -8,11 +8,13 @@ if (!API_URL) {
 const cleanUrl = (url) => url?.replace(/\/+$/, '') || '';
 
 export function getFullUrl(path) {
-    if (!path) return '';
-    // Remove leading slash if it exists
-    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-    // Ensure we don't have double slashes and handle empty path
-    return cleanPath ? `${cleanUrl(API_URL)}/${cleanPath}` : cleanUrl(API_URL);
+    if (!path) return cleanUrl(API_URL);
+
+    // Remove leading slash if it exists, as we'll add it back in a controlled way
+    const cleanPath = path.replace(/^\/+/, '');
+
+    // Construct the full URL, ensuring no double slashes
+    return `${cleanUrl(API_URL)}/${cleanPath}`;
 }
 
 export function getImageUrl(path) {
@@ -21,7 +23,7 @@ export function getImageUrl(path) {
     if (path.startsWith('http')) return path;
 
     // Remove /public prefix if it exists
-    const cleanPath = path.startsWith('/public/') ? path.slice(7) : path;
+    const cleanPath = path.replace(/^\/?(public\/)?/, '');
 
     // Always use the full API URL for images
     return `${cleanUrl(API_URL)}/public/${cleanPath}`;
@@ -38,8 +40,7 @@ export async function fetchApi(path, options = {}) {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 ...options.headers,
-            },
-            credentials: 'include' // Include cookies if needed
+            }
         });
 
         if (!response.ok) {

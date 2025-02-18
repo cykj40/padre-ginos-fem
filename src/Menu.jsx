@@ -19,9 +19,10 @@ function Menu() {
   useEffect(() => {
     async function fetchPizzas() {
       try {
-        const data = await fetchApi('api/pizzas');
+        const data = await fetchApi('/api/pizzas');
         setPizzas(data);
       } catch (err) {
+        console.error('Error fetching pizzas:', err);
         setError(err.message);
       } finally {
         setLoading(false);
