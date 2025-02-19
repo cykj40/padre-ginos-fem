@@ -124,7 +124,31 @@ server.register(fastifyStatic, {
     root: path.join(__dirname, "public"),
     prefix: "/public/",
     maxAge: process.env.NODE_ENV === 'production' ? 86400000 : 0, // 1 day cache in production
-    decorateReply: false // Important for Vercel deployment
+    decorateReply: false, // Important for Vercel deployment
+    setHeaders: (res) => {
+        // Enable CORS for static files
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day cache
+        res.setHeader('Vary', 'Origin');
+    }
+});
+
+// Add a route to check if images exist
+server.get("/public/pizzas/:filename", async (request, reply) => {
+    const filename = request.params.filename;
+    const filePath = path.join(__dirname, "public", "pizzas", filename);
+
+    try {
+        await import('fs/promises').then(fs => fs.access(filePath));
+        return reply.sendFile(`pizzas/${filename}`);
+    } catch (error) {
+        request.log.error(`Image not found: ${filename}`);
+        return reply.status(404).send({
+            error: 'Image not found',
+            message: `The image ${filename} does not exist`
+        });
+    }
 });
 
 // Input validation schema for order
@@ -177,6 +201,10 @@ server.get("/api/pizzas", async function getPizzas(req, res) {
         const pizzas = pizzasResult.rows;
         const pizzaSizes = pizzaSizesResult.rows;
 
+        const baseUrl = process.env.NODE_ENV === 'production'
+            ? 'https://padre-ginos-fem.onrender.com'
+            : `http://${HOST}:${PORT}`;
+
         const responsePizzas = pizzas.map((pizza) => {
             const sizes = pizzaSizes.reduce((acc, current) => {
                 if (current.id === pizza.pizza_type_id) {
@@ -189,7 +217,7 @@ server.get("/api/pizzas", async function getPizzas(req, res) {
                 name: pizza.name,
                 category: pizza.category,
                 description: pizza.description,
-                image: `/public/pizzas/${PIZZA_IMAGE_NAMES[pizza.pizza_type_id]}.webp`,
+                image: `${baseUrl}/public/pizzas/${PIZZA_IMAGE_NAMES[pizza.pizza_type_id]}.webp`,
                 sizes,
             };
         });

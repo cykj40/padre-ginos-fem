@@ -19,13 +19,12 @@ export function getFullUrl(path) {
 
 export function getImageUrl(path) {
     if (!path) return '';
-    // If it's a full URL, return as is
+
+    // If it's already a full URL (from the API), return as is
     if (path.startsWith('http')) return path;
 
-    // Remove /public prefix if it exists
+    // If it's a relative path, construct the full URL
     const cleanPath = path.replace(/^\/?(public\/)?/, '');
-
-    // Always use the full API URL for images
     return `${cleanUrl(API_URL)}/public/${cleanPath}`;
 }
 
