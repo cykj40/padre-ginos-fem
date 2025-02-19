@@ -28,13 +28,6 @@ if (import.meta.env.DEV) {
 // Helper to ensure URL has no trailing slash
 const cleanUrl = (url) => url?.replace(/\/+$/, '') || '';
 
-// Helper to ensure URL starts with https:// or http://
-const ensureAbsoluteUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${API_URL}${url.startsWith('/') ? '' : '/'}${url}`;
-};
-
 export function getFullUrl(path) {
     if (!path) return cleanUrl(API_URL);
     if (path.startsWith('http')) return path;
@@ -45,8 +38,13 @@ export function getFullUrl(path) {
 export function getImageUrl(path) {
     if (!path) return '';
     if (path.startsWith('http')) return path;
+    // Remove any leading slashes and 'public' from the path
     const cleanPath = path.replace(/^\/?(public\/)?/, '');
-    return ensureAbsoluteUrl(`public/${cleanPath}`);
+    // Ensure we're using HTTPS in production
+    const baseUrl = import.meta.env.PROD
+        ? 'https://padre-ginos-fem.onrender.com'
+        : import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    return `${baseUrl}/public/${cleanPath}`;
 }
 
 export async function fetchApi(path, options = {}) {
