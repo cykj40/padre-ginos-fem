@@ -98,6 +98,20 @@ server.register(cors, {
     optionsSuccessStatus: 204
 });
 
+// Register static file serving BEFORE routes
+server.register(fastifyStatic, {
+    root: path.join(__dirname, "public"),
+    prefix: "/public/",
+    maxAge: process.env.NODE_ENV === 'production' ? 86400000 : 0, // 1 day cache in production
+    decorateReply: true,
+    setHeaders: (res) => {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        res.setHeader('Vary', 'Origin');
+    }
+});
+
 // Add root route handler
 server.get('/', async () => {
     return {
@@ -119,90 +133,26 @@ const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Rate limiting for static files
-server.register(fastifyStatic, {
-    root: path.join(__dirname, "public"),
-    prefix: "/public/",
-    maxAge: process.env.NODE_ENV === 'production' ? 86400000 : 0, // 1 day cache in production
-    decorateReply: false, // Important for Vercel deployment
-    setHeaders: (res, pathName) => {
-        // Enable CORS for static files
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-        res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day cache
-        res.setHeader('Vary', 'Origin');
-
-        // Log static file requests in development
-        if (process.env.NODE_ENV !== 'production') {
-            console.log('Static file requested:', pathName);
-        }
-    }
-});
-
 // Add a route to check if images exist
 server.get("/public/pizzas/:filename", async (request, reply) => {
     const filename = request.params.filename;
-    const filePath = path.join(__dirname, "public", "pizzas", filename);
-
-    // Log request details
-    request.log.info({
-        msg: 'Pizza image requested',
-        filename,
-        filePath,
-        headers: request.headers,
-        origin: request.headers.origin,
-        referer: request.headers.referer,
-        clientIp: request.ip
-    });
+    const filePath = path.join("pizzas", filename);
 
     try {
-        const fs = await import('fs/promises');
-
-        // Check if file exists
-        try {
-            const stats = await fs.stat(filePath);
-            request.log.info({
-                msg: 'Image file stats',
-                filename,
-                size: stats.size,
-                exists: true
-            });
-        } catch (statError) {
-            request.log.error({
-                msg: 'Image file not found',
-                filename,
-                error: statError.message,
-                code: statError.code
-            });
-            return reply.status(404).send({
-                error: 'Image not found',
-                message: `The image ${filename} does not exist`,
-                details: {
-                    code: statError.code,
-                    error: statError.message,
-                    path: filePath
-                }
-            });
-        }
-
-        // Try to send the file
-        return reply.sendFile(`pizzas/${filename}`);
+        return reply.sendFile(filePath);
     } catch (error) {
         request.log.error({
             msg: 'Error serving image',
             filename,
             error: error.message,
-            stack: error.stack,
-            code: error.code
+            stack: error.stack
         });
 
         return reply.status(500).send({
             error: 'Failed to serve image',
             message: `Failed to serve image ${filename}`,
             details: {
-                code: error.code,
-                error: error.message,
-                path: filePath
+                error: error.message
             }
         });
     }
@@ -259,7 +209,14 @@ const getBaseUrl = () => {
 // Helper to construct image URLs
 const getImageUrl = (pizzaId) => {
     const baseUrl = getBaseUrl();
-    return `${baseUrl}/public/pizzas/${PIZZA_IMAGE_NAMES[pizzaId]}.webp`;
+    const imageName = PIZZA_IMAGE_NAMES[pizzaId];
+    if (!imageName) {
+        console.error('No image name found for pizza ID:', pizzaId);
+        return null;
+    }
+    const imageUrl = `${baseUrl}/public/pizzas/${imageName}.webp`;
+    console.log('Constructed image URL:', imageUrl);
+    return imageUrl;
 };
 
 server.get("/api/pizzas", async function getPizzas(req, res) {
