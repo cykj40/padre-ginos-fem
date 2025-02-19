@@ -5,6 +5,13 @@ import { fileURLToPath } from "url";
 import cors from "@fastify/cors";
 import client from './db.js';
 
+// Allowed origins including Netlify's static IPs
+const ALLOWED_ORIGINS = [
+    'https://padre-ginos-pizza.netlify.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+];
+
 // Pizza image filename mapping
 const PIZZA_IMAGE_NAMES = {
     1: 'big-meat',
@@ -39,12 +46,25 @@ const server = fastify({
     }
 });
 
-// Register CORS
+// Register CORS with specific configuration
 server.register(cors, {
-    origin: true,
+    origin: (origin, cb) => {
+        if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+            cb(null, true);
+            return;
+        }
+        // Allow requests from Netlify's static IPs
+        if (origin.match(/^https:\/\/[^/]+\.netlify\.app$/)) {
+            cb(null, true);
+            return;
+        }
+        cb(new Error('Not allowed by CORS'), false);
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
+    credentials: true,
+    maxAge: 86400 // 24 hours
 });
 
 // Add root route handler

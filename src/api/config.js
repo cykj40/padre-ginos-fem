@@ -40,7 +40,9 @@ export async function fetchApi(path, options = {}) {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 ...options.headers,
-            }
+            },
+            mode: 'cors',
+            credentials: 'include'
         });
 
         if (!response.ok) {
@@ -49,7 +51,8 @@ export async function fetchApi(path, options = {}) {
                 status: response.status,
                 statusText: response.statusText,
                 headers: Object.fromEntries(response.headers.entries()),
-                body: errorText
+                body: errorText,
+                url
             });
             throw new Error(`API call failed: ${response.status} ${response.statusText}`);
         }
@@ -60,7 +63,8 @@ export async function fetchApi(path, options = {}) {
         } catch (error) {
             console.error('JSON Parse Error:', {
                 text,
-                error: error.message
+                error: error.message,
+                url
             });
             throw new Error('Invalid JSON response from server');
         }
