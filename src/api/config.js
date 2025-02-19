@@ -41,33 +41,36 @@ export async function fetchApi(path, options = {}) {
                 'Content-Type': 'application/json',
                 ...options.headers,
             },
-            mode: 'cors',
-            credentials: 'include'
+            mode: 'cors'
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('API Error Response:', {
-                status: response.status,
-                statusText: response.statusText,
-                headers: Object.fromEntries(response.headers.entries()),
-                body: errorText,
-                url
-            });
-            throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+        // Check content type before trying to parse JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            console.error('Invalid content type:', contentType);
+            throw new Error(`Expected JSON response but got ${contentType}`);
         }
 
         const text = await response.text();
+        let data;
         try {
-            return JSON.parse(text);
+            data = JSON.parse(text);
         } catch (error) {
             console.error('JSON Parse Error:', {
                 text,
                 error: error.message,
-                url
+                url,
+                contentType
             });
             throw new Error('Invalid JSON response from server');
         }
+
+        if (!response.ok) {
+            // If we got a JSON error response, throw it
+            throw new Error(data.message || `API call failed: ${response.status} ${response.statusText}`);
+        }
+
+        return data;
     } catch (error) {
         console.error('Fetch Error:', {
             url,

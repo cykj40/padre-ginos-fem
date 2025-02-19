@@ -12,6 +12,13 @@ const ALLOWED_ORIGINS = [
     'http://localhost:3000'
 ];
 
+// Netlify's static outbound IP addresses
+const NETLIFY_IPS = [
+    '3.134.238.10',
+    '3.129.111.220',
+    '52.15.118.168'
+];
+
 // Pizza image filename mapping
 const PIZZA_IMAGE_NAMES = {
     1: 'big-meat',
@@ -36,7 +43,7 @@ const server = fastify({
                 target: "pino-pretty",
             },
     },
-    trustProxy: true,
+    trustProxy: NETLIFY_IPS, // Trust Netlify's IP addresses
     ajv: {
         customOptions: {
             removeAdditional: 'all',
@@ -49,22 +56,46 @@ const server = fastify({
 // Register CORS with specific configuration
 server.register(cors, {
     origin: (origin, cb) => {
-        if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) {
             cb(null, true);
             return;
         }
-        // Allow requests from Netlify's static IPs
+
+        // Check if origin is in allowed list
+        if (ALLOWED_ORIGINS.includes(origin)) {
+            cb(null, true);
+            return;
+        }
+
+        // Allow requests from any Netlify subdomain
         if (origin.match(/^https:\/\/[^/]+\.netlify\.app$/)) {
             cb(null, true);
             return;
         }
+
+        // Allow requests from Netlify's static IPs
+        const clientIp = origin.replace(/^https?:\/\//, '').split(':')[0];
+        if (NETLIFY_IPS.includes(clientIp)) {
+            cb(null, true);
+            return;
+        }
+
+        // Log rejected origins in development
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('Rejected CORS origin:', origin);
+        }
+
+        // Reject all other origins
         cb(new Error('Not allowed by CORS'), false);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Forwarded-For'],
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
     credentials: true,
-    maxAge: 86400 // 24 hours
+    maxAge: 86400, // 24 hours
+    preflightContinue: false,
+    optionsSuccessStatus: 204
 });
 
 // Add root route handler
@@ -416,14 +447,46 @@ server.post("/api/contact", async function contactForm(req, res) {
     res.send({ success: "Message received" });
 });
 
-// Error handler
+// Error handler - ensure JSON responses even for errors
 server.setErrorHandler((error, request, reply) => {
     request.log.error(error);
+
+    // Set content type to JSON
+    reply.type('application/json');
+
+    if (error.statusCode === 404) {
+        reply.status(404).send({
+            error: 'Not Found',
+            message: 'The requested resource was not found',
+            statusCode: 404
+        });
+        return;
+    }
+
+    if (error.statusCode === 401) {
+        reply.status(401).send({
+            error: 'Unauthorized',
+            message: 'Authentication is required to access this resource',
+            statusCode: 401
+        });
+        return;
+    }
+
     if (process.env.NODE_ENV === 'production') {
-        // Don't send error details in production
-        reply.status(500).send({ error: 'Internal Server Error' });
+        // Don't leak error details in production
+        reply.status(500).send({
+            error: 'Internal Server Error',
+            message: 'An unexpected error occurred',
+            statusCode: 500
+        });
     } else {
-        reply.status(500).send({ error: error.message });
+        // Include error details in development
+        reply.status(500).send({
+            error: 'Internal Server Error',
+            message: error.message,
+            stack: error.stack,
+            statusCode: 500
+        });
     }
 });
 
