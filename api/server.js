@@ -68,7 +68,7 @@ server.register(cors, {
 });
 
 // Add root route handler
-server.get('/', async (request, reply) => {
+server.get('/', async () => {
     return {
         status: 'ok',
         message: 'Padre Gino\'s Pizza API',
