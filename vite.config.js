@@ -44,28 +44,30 @@ export default defineConfig(({ command, mode }) => {
     build: {
       outDir: 'dist',
       sourcemap: true,
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            'react-vendor': ['react', 'react-dom'],
-            'tanstack-vendor': ['@tanstack/react-query', '@tanstack/react-router']
-          }
-        }
+      commonjsOptions: {
+        include: [/node_modules/],
+        transformMixedEsModules: true
       }
     },
     define: {
-      // Stringify all environment variables
-      ...Object.keys(env).reduce((acc, key) => ({
-        ...acc,
-        [`process.env.${key}`]: JSON.stringify(env[key])
-      }), {}),
-      // Ensure VITE_API_URL is always defined
+      'process.env.NODE_ENV': JSON.stringify(mode),
       'process.env.VITE_API_URL': JSON.stringify(apiUrl)
     },
     plugins: [
-      react(),
+      react({
+        jsxRuntime: 'automatic',
+        jsxImportSource: 'react',
+        babel: {
+          plugins: [
+            ['@babel/plugin-transform-react-jsx', { runtime: 'automatic' }]
+          ]
+        }
+      }),
       TanStackRouterVite()
     ],
+    optimizeDeps: {
+      include: ['react', 'react-dom']
+    },
     test: {
       environment: "happy-dom",
       coverage: {
