@@ -7,12 +7,6 @@
   VITE_API_URL = "https://padre-ginos-fem.onrender.com"
   NPM_FLAGS = "--legacy-peer-deps"
 
-# Redirect all routes to index.html for client-side routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
 # Redirect API requests to the backend
 [[redirects]]
   from = "/api/*"
@@ -28,6 +22,12 @@
   status = 200
   force = true
   headers = {Access-Control-Allow-Origin = "*"}
+
+# Redirect all other routes to index.html for client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
 # Set security headers for all routes
 [[headers]]
