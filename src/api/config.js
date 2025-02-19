@@ -43,30 +43,43 @@ export async function fetchApi(path, options = {}) {
             mode: 'cors'
         });
 
-        // Check content type before trying to parse JSON
         const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            console.error('Invalid content type:', contentType);
-            throw new Error(`Expected JSON response but got ${contentType}`);
-        }
-
         const text = await response.text();
+
+        // Debug logging
+        console.log('Response details:', {
+            status: response.status,
+            contentType,
+            url,
+            text: text.substring(0, 150) // Log first 150 chars
+        });
+
+        // Try to parse as JSON only if content type is correct
         let data;
-        try {
-            data = JSON.parse(text);
-        } catch (error) {
-            console.error('JSON Parse Error:', {
-                text,
-                error: error.message,
-                url,
-                contentType
+        if (contentType && contentType.includes('application/json')) {
+            try {
+                data = JSON.parse(text);
+            } catch (error) {
+                console.error('JSON Parse Error:', {
+                    text,
+                    error: error.message,
+                    url,
+                    contentType
+                });
+                throw new Error('Invalid JSON response from server');
+            }
+        } else {
+            console.error('Invalid content type:', {
+                contentType,
+                text: text.substring(0, 150),
+                status: response.status,
+                url
             });
-            throw new Error('Invalid JSON response from server');
+            throw new Error(`Expected JSON response but got ${contentType || 'unknown content type'}`);
         }
 
         if (!response.ok) {
-            // If we got a JSON error response, throw it
-            throw new Error(data.message || `API call failed: ${response.status} ${response.statusText}`);
+            throw new Error(data?.message || `API call failed: ${response.status} ${response.statusText}`);
         }
 
         return data;

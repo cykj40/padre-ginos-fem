@@ -63,7 +63,7 @@ function PastOrdersRoute() {
         <button disabled={data.length < 10} onClick={() => setPage(page + 1)}>Next</button>
       </div>
       {focusedOrder && (
-        <Modal>
+        <Modal onClose={() => setFocusedOrder(null)}>
           <h2>Order #{focusedOrder}</h2>
           {isLoadingPastOrder ? (
             <p>Loading...</p>
