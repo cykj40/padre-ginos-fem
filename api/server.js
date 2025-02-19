@@ -618,22 +618,50 @@ server.setErrorHandler((error, request, reply) => {
 // Graceful shutdown
 const closeGracefully = async (signal) => {
     console.log(`Received signal to terminate: ${signal}`);
-    await server.close();
+
+    try {
+        await server.close();
+        console.log('Server closed successfully');
+
+        // Close database connection if it exists
+        if (client) {
+            await client.close();
+            console.log('Database connection closed');
+        }
+    } catch (error) {
+        console.error('Error during shutdown:', error);
+    }
+
     process.exit(0);
 };
 
 process.on('SIGINT', closeGracefully);
 process.on('SIGTERM', closeGracefully);
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+    closeGracefully('uncaughtException');
+});
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    closeGracefully('unhandledRejection');
+});
 
 const start = async () => {
     try {
+        // Test database connection
+        await client.execute("SELECT 1");
+        console.log('Database connection successful');
+
         await server.listen({
             port: PORT,
             host: HOST
         });
+
         console.log(`Server listening on ${HOST}:${PORT}`);
+        console.log('Environment:', process.env.NODE_ENV);
+        console.log('Database URL:', process.env.TURSO_DATABASE_URL ? 'Set' : 'Not set');
     } catch (err) {
-        console.error(err);
+        console.error('Failed to start server:', err);
         process.exit(1);
     }
 };
