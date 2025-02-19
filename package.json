@@ -9,8 +9,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
     "preview": "vite preview",
+    "start": "vite preview",
+    "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{js,jsx}\"",
     "test": "vitest",
     "test:coverage": "vitest --coverage",

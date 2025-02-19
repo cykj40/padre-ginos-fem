@@ -1,7 +1,5 @@
-import { getFullUrl } from './config';
+import { fetchApi } from './config';
 
 export default async function getPastOrder(order) {
-    const response = await fetch(getFullUrl(`/api/past-order/${order}`));
-    const data = await response.json();
-    return data;
+    return fetchApi(`api/past-order/${order}`);
 }
