@@ -125,12 +125,17 @@ server.register(fastifyStatic, {
     prefix: "/public/",
     maxAge: process.env.NODE_ENV === 'production' ? 86400000 : 0, // 1 day cache in production
     decorateReply: false, // Important for Vercel deployment
-    setHeaders: (res) => {
+    setHeaders: (res, pathName) => {
         // Enable CORS for static files
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
         res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day cache
         res.setHeader('Vary', 'Origin');
+
+        // Log static file requests in development
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('Static file requested:', pathName);
+        }
     }
 });
 
@@ -139,14 +144,66 @@ server.get("/public/pizzas/:filename", async (request, reply) => {
     const filename = request.params.filename;
     const filePath = path.join(__dirname, "public", "pizzas", filename);
 
+    // Log request details
+    request.log.info({
+        msg: 'Pizza image requested',
+        filename,
+        filePath,
+        headers: request.headers,
+        origin: request.headers.origin,
+        referer: request.headers.referer,
+        clientIp: request.ip
+    });
+
     try {
-        await import('fs/promises').then(fs => fs.access(filePath));
+        const fs = await import('fs/promises');
+
+        // Check if file exists
+        try {
+            const stats = await fs.stat(filePath);
+            request.log.info({
+                msg: 'Image file stats',
+                filename,
+                size: stats.size,
+                exists: true
+            });
+        } catch (statError) {
+            request.log.error({
+                msg: 'Image file not found',
+                filename,
+                error: statError.message,
+                code: statError.code
+            });
+            return reply.status(404).send({
+                error: 'Image not found',
+                message: `The image ${filename} does not exist`,
+                details: {
+                    code: statError.code,
+                    error: statError.message,
+                    path: filePath
+                }
+            });
+        }
+
+        // Try to send the file
         return reply.sendFile(`pizzas/${filename}`);
     } catch (error) {
-        request.log.error(`Image not found: ${filename}`);
-        return reply.status(404).send({
-            error: 'Image not found',
-            message: `The image ${filename} does not exist`
+        request.log.error({
+            msg: 'Error serving image',
+            filename,
+            error: error.message,
+            stack: error.stack,
+            code: error.code
+        });
+
+        return reply.status(500).send({
+            error: 'Failed to serve image',
+            message: `Failed to serve image ${filename}`,
+            details: {
+                code: error.code,
+                error: error.message,
+                path: filePath
+            }
         });
     }
 });
@@ -212,20 +269,38 @@ server.get("/api/pizzas", async function getPizzas(req, res) {
                 }
                 return acc;
             }, {});
+
+            const imagePath = `${baseUrl}/public/pizzas/${PIZZA_IMAGE_NAMES[pizza.pizza_type_id]}.webp`;
+
+            // Log image path construction
+            req.log.info({
+                msg: 'Constructing pizza image path',
+                pizzaId: pizza.pizza_type_id,
+                imageName: PIZZA_IMAGE_NAMES[pizza.pizza_type_id],
+                fullPath: imagePath
+            });
+
             return {
                 id: pizza.pizza_type_id,
                 name: pizza.name,
                 category: pizza.category,
                 description: pizza.description,
-                image: `${baseUrl}/public/pizzas/${PIZZA_IMAGE_NAMES[pizza.pizza_type_id]}.webp`,
+                image: imagePath,
                 sizes,
             };
         });
 
         res.send(responsePizzas);
     } catch (error) {
-        req.log.error(error);
-        res.status(500).send({ error: "Failed to fetch pizzas" });
+        req.log.error({
+            msg: 'Failed to fetch pizzas',
+            error: error.message,
+            stack: error.stack
+        });
+        res.status(500).send({
+            error: "Failed to fetch pizzas",
+            details: error.message
+        });
     }
 });
 
