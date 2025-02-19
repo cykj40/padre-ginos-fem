@@ -108,11 +108,13 @@ server.register(fastifyStatic, {
     prefix: "/public/",
     maxAge: process.env.NODE_ENV === 'production' ? 86400000 : 0, // 1 day cache in production
     decorateReply: true,
+    serveDotFiles: false,
     setHeaders: (res) => {
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
         res.setHeader('Cache-Control', 'public, max-age=86400');
         res.setHeader('Vary', 'Origin');
+        res.setHeader('Content-Type', 'image/webp');
     }
 });
 
@@ -216,7 +218,6 @@ const getImageUrl = (pizzaId) => {
         return null;
     }
     const imageUrl = `${baseUrl}/public/pizzas/${imageName}.webp`;
-    console.log('Constructed image URL:', imageUrl);
     return imageUrl;
 };
 
