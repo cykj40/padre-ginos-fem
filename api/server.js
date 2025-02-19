@@ -5,6 +5,10 @@ import { fileURLToPath } from "url";
 import cors from "@fastify/cors";
 import client from './db.js';
 
+// ES Module dirname initialization
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Allowed origins including Netlify's static IPs
 const ALLOWED_ORIGINS = [
     'https://padre-ginos-pizza.netlify.app',
@@ -129,9 +133,6 @@ server.get('/', async () => {
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Add a route to check if images exist
 server.get("/public/pizzas/:filename", async (request, reply) => {
