@@ -246,6 +246,22 @@ server.get("/health", async (req, res) => {
     }
 });
 
+// Get base URL for assets
+const getBaseUrl = () => {
+    // Always use HTTPS in production
+    if (process.env.NODE_ENV === 'production') {
+        return 'https://padre-ginos-fem.onrender.com';
+    }
+    // Development URL
+    return `http://${HOST}:${PORT}`;
+};
+
+// Helper to construct image URLs
+const getImageUrl = (pizzaId) => {
+    const baseUrl = getBaseUrl();
+    return `${baseUrl}/public/pizzas/${PIZZA_IMAGE_NAMES[pizzaId]}.webp`;
+};
+
 server.get("/api/pizzas", async function getPizzas(req, res) {
     try {
         const pizzasResult = await client.execute(
@@ -258,10 +274,6 @@ server.get("/api/pizzas", async function getPizzas(req, res) {
         const pizzas = pizzasResult.rows;
         const pizzaSizes = pizzaSizesResult.rows;
 
-        const baseUrl = process.env.NODE_ENV === 'production'
-            ? 'https://padre-ginos-fem.onrender.com'
-            : `http://${HOST}:${PORT}`;
-
         const responsePizzas = pizzas.map((pizza) => {
             const sizes = pizzaSizes.reduce((acc, current) => {
                 if (current.id === pizza.pizza_type_id) {
@@ -270,15 +282,17 @@ server.get("/api/pizzas", async function getPizzas(req, res) {
                 return acc;
             }, {});
 
-            const imagePath = `${baseUrl}/public/pizzas/${PIZZA_IMAGE_NAMES[pizza.pizza_type_id]}.webp`;
+            const imagePath = getImageUrl(pizza.pizza_type_id);
 
-            // Log image path construction
-            req.log.info({
-                msg: 'Constructing pizza image path',
-                pizzaId: pizza.pizza_type_id,
-                imageName: PIZZA_IMAGE_NAMES[pizza.pizza_type_id],
-                fullPath: imagePath
-            });
+            // Log image path construction in development
+            if (process.env.NODE_ENV !== 'production') {
+                req.log.info({
+                    msg: 'Constructing pizza image path',
+                    pizzaId: pizza.pizza_type_id,
+                    imageName: PIZZA_IMAGE_NAMES[pizza.pizza_type_id],
+                    fullPath: imagePath
+                });
+            }
 
             return {
                 id: pizza.pizza_type_id,
@@ -305,46 +319,54 @@ server.get("/api/pizzas", async function getPizzas(req, res) {
 });
 
 server.get("/api/pizza-of-the-day", async function getPizzaOfTheDay(req, res) {
-    const pizzasResult = await client.execute(
-        `SELECT 
-      pizza_type_id as id, name, category, ingredients as description
-    FROM 
-      pizza_types`
-    );
+    try {
+        const pizzasResult = await client.execute(
+            `SELECT 
+                pizza_type_id as id, name, category, ingredients as description
+            FROM 
+                pizza_types`
+        );
 
-    const pizzas = pizzasResult.rows;
+        const pizzas = pizzasResult.rows;
 
-    const daysSinceEpoch = Math.floor(Date.now() / 86400000);
-    const pizzaIndex = daysSinceEpoch % pizzas.length;
-    const pizza = pizzas[pizzaIndex];
+        const daysSinceEpoch = Math.floor(Date.now() / 86400000);
+        const pizzaIndex = daysSinceEpoch % pizzas.length;
+        const pizza = pizzas[pizzaIndex];
 
-    const pizzaSizesResult = await client.execute(
-        `SELECT
-      size, price
-    FROM
-      pizzas
-    WHERE
-      pizza_type_id = ?`,
-        [pizza.id]
-    );
+        const pizzaSizesResult = await client.execute(
+            `SELECT size, price
+            FROM pizzas
+            WHERE pizza_type_id = ?`,
+            [pizza.id]
+        );
 
-    const pizzaSizes = pizzaSizesResult.rows;
+        const pizzaSizes = pizzaSizesResult.rows;
+        const sizeObj = pizzaSizes.reduce((acc, current) => {
+            acc[current.size] = +current.price;
+            return acc;
+        }, {});
 
-    const sizeObj = pizzaSizes.reduce((acc, current) => {
-        acc[current.size] = +current.price;
-        return acc;
-    }, {});
+        const responsePizza = {
+            id: pizza.id,
+            name: pizza.name,
+            category: pizza.category,
+            description: pizza.description,
+            image: getImageUrl(pizza.id),
+            sizes: sizeObj,
+        };
 
-    const responsePizza = {
-        id: pizza.id,
-        name: pizza.name,
-        category: pizza.category,
-        description: pizza.description,
-        image: `/public/pizzas/${PIZZA_IMAGE_NAMES[pizza.id]}.webp`,
-        sizes: sizeObj,
-    };
-
-    res.send(responsePizza);
+        res.send(responsePizza);
+    } catch (error) {
+        req.log.error({
+            msg: 'Failed to fetch pizza of the day',
+            error: error.message,
+            stack: error.stack
+        });
+        res.status(500).send({
+            error: "Failed to fetch pizza of the day",
+            details: error.message
+        });
+    }
 });
 
 server.get("/api/orders", async function getOrders(req, res) {

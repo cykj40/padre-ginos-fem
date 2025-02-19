@@ -13,4 +13,7 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Access-Control-Allow-Origin = "*" 
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Forwarded-For"
+    Content-Security-Policy = "default-src 'self' https://padre-ginos-fem.onrender.com; img-src 'self' https://padre-ginos-fem.onrender.com data: https:; style-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval';" 

@@ -1,16 +1,39 @@
-export const API_URL = import.meta.env.VITE_API_URL || 'https://padre-ginos-fem.onrender.com';
+// Get the API URL from environment variables, with a fallback
+export const API_URL = import.meta.env.VITE_API_URL?.replace(/\/+$/, '') || 'https://padre-ginos-fem.onrender.com';
 
-if (!API_URL) {
-    console.error('VITE_API_URL is not set in environment variables');
+// Validate API URL format
+if (!API_URL.startsWith('http')) {
+    console.error('Invalid API_URL format:', API_URL);
+}
+
+// Log API configuration in development
+if (import.meta.env.DEV) {
+    console.log('API Configuration:', {
+        API_URL,
+        NODE_ENV: import.meta.env.MODE,
+        isDev: import.meta.env.DEV,
+        origin: window.location.origin
+    });
 }
 
 // Helper to ensure URL has no trailing slash
 const cleanUrl = (url) => url?.replace(/\/+$/, '') || '';
 
+// Helper to ensure URL starts with https:// or http://
+const ensureAbsoluteUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    // Always use the API_URL as the base for relative URLs
+    return `${API_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export function getFullUrl(path) {
     if (!path) return cleanUrl(API_URL);
 
-    // Remove leading slash if it exists, as we'll add it back in a controlled way
+    // If path is already a full URL, return it
+    if (path.startsWith('http')) return path;
+
+    // Remove leading slash if it exists
     const cleanPath = path.replace(/^\/+/, '');
 
     // Construct the full URL, ensuring no double slashes
@@ -20,17 +43,25 @@ export function getFullUrl(path) {
 export function getImageUrl(path) {
     if (!path) return '';
 
-    // If it's already a full URL (from the API), return as is
+    // If it's already a full URL, return as is
     if (path.startsWith('http')) return path;
 
-    // If it's a relative path, construct the full URL
+    // Clean the path and ensure it starts with public/
     const cleanPath = path.replace(/^\/?(public\/)?/, '');
-    return `${cleanUrl(API_URL)}/public/${cleanPath}`;
+    return ensureAbsoluteUrl(`public/${cleanPath}`);
 }
 
 export async function fetchApi(path, options = {}) {
     const url = getFullUrl(path);
-    console.log('Fetching from:', url); // Debug log
+
+    if (import.meta.env.DEV) {
+        console.log('Fetching from:', url, {
+            options,
+            path,
+            baseUrl: API_URL,
+            origin: window.location.origin
+        });
+    }
 
     try {
         const response = await fetch(url, {
@@ -40,42 +71,49 @@ export async function fetchApi(path, options = {}) {
                 'Content-Type': 'application/json',
                 ...options.headers,
             },
-            mode: 'cors'
+            mode: 'cors',
+            credentials: 'same-origin'
         });
 
         const contentType = response.headers.get('content-type');
         const text = await response.text();
 
         // Debug logging
-        console.log('Response details:', {
-            status: response.status,
-            contentType,
-            url,
-            text: text.substring(0, 150) // Log first 150 chars
-        });
+        if (!response.ok || import.meta.env.DEV) {
+            console.log('Response details:', {
+                status: response.status,
+                contentType,
+                url,
+                text: text.substring(0, 150), // Log first 150 chars
+                headers: Object.fromEntries(response.headers.entries())
+            });
+        }
 
         // Try to parse as JSON only if content type is correct
         let data;
-        if (contentType && contentType.includes('application/json')) {
+        if (contentType?.includes('application/json')) {
             try {
                 data = JSON.parse(text);
             } catch (error) {
                 console.error('JSON Parse Error:', {
-                    text,
                     error: error.message,
+                    text: text.substring(0, 150),
                     url,
-                    contentType
+                    contentType,
+                    status: response.status
                 });
-                throw new Error('Invalid JSON response from server');
+                throw new Error(`Invalid JSON response from server: ${error.message}`);
             }
         } else {
-            console.error('Invalid content type:', {
+            const errorDetails = {
                 contentType,
-                text: text.substring(0, 150),
                 status: response.status,
-                url
-            });
-            throw new Error(`Expected JSON response but got ${contentType || 'unknown content type'}`);
+                url,
+                responsePreview: text.substring(0, 150),
+                headers: Object.fromEntries(response.headers.entries())
+            };
+            console.error('Invalid content type:', errorDetails);
+            throw new Error(`Expected JSON response but got ${contentType || 'unknown content type'}. Status: ${response.status}`);
         }
 
         if (!response.ok) {
@@ -84,9 +122,13 @@ export async function fetchApi(path, options = {}) {
 
         return data;
     } catch (error) {
-        console.error('Fetch Error:', {
+        // Enhanced error logging
+        console.error('API Request Failed:', {
             url,
-            error: error.message
+            error: error.message,
+            stack: error.stack,
+            origin: window.location.origin,
+            apiUrl: API_URL
         });
         throw error;
     }
