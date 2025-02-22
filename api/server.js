@@ -25,17 +25,16 @@ const NETLIFY_IPS = [
 
 // Pizza image filename mapping
 const PIZZA_IMAGE_NAMES = {
-    1: 'big-meat',
-    2: 'greek',
-    3: 'hawaiian',
-    4: 'mediterraneo',
-    5: 'mexican',
-    6: 'napolitana',
-    7: 'pepperoni',
-    8: 'sicilian',
-    9: 'spinach',
-    10: 'thai',
-    11: 'veggie'
+    'big-meat': 'big-meat',
+    'greek': 'greek',
+    'hawaiian': 'hawaiian',
+    'mexican': 'mexican',
+    'napolitana': 'napolitana',
+    'pepperoni': 'pepperoni',
+    'sicilian': 'sicilian',
+    'spinach': 'spinach',
+    'thai': 'thai',
+    'veggie': 'veggie'
 };
 
 const server = fastify({
@@ -224,10 +223,10 @@ const getImageUrl = (pizzaId) => {
 server.get("/api/pizzas", async function getPizzas(req, res) {
     try {
         const pizzasResult = await client.execute(
-            "SELECT pizza_type_id, name, category, ingredients as description FROM pizza_types"
+            "SELECT id, name, category, ingredients as description FROM pizza_types"
         );
         const pizzaSizesResult = await client.execute(
-            `SELECT pizza_type_id as id, size, price FROM pizzas`
+            `SELECT id, size, price FROM pizzas`
         );
 
         const pizzas = pizzasResult.rows;
@@ -235,26 +234,26 @@ server.get("/api/pizzas", async function getPizzas(req, res) {
 
         const responsePizzas = pizzas.map((pizza) => {
             const sizes = pizzaSizes.reduce((acc, current) => {
-                if (current.id === pizza.pizza_type_id) {
+                if (current.id === pizza.id) {
                     acc[current.size] = +current.price;
                 }
                 return acc;
             }, {});
 
-            const imagePath = getImageUrl(pizza.pizza_type_id);
+            const imagePath = getImageUrl(pizza.id);
 
             // Log image path construction in development
             if (process.env.NODE_ENV !== 'production') {
                 req.log.info({
                     msg: 'Constructing pizza image path',
-                    pizzaId: pizza.pizza_type_id,
-                    imageName: PIZZA_IMAGE_NAMES[pizza.pizza_type_id],
+                    pizzaId: pizza.id,
+                    imageName: PIZZA_IMAGE_NAMES[pizza.id],
                     fullPath: imagePath
                 });
             }
 
             return {
-                id: pizza.pizza_type_id,
+                id: pizza.id,
                 name: pizza.name,
                 category: pizza.category,
                 description: pizza.description,
@@ -281,7 +280,7 @@ server.get("/api/pizza-of-the-day", async function getPizzaOfTheDay(req, res) {
     try {
         const pizzasResult = await client.execute(
             `SELECT 
-                pizza_type_id as id, name, category, ingredients as description
+                id, name, category, ingredients as description
             FROM 
                 pizza_types`
         );
@@ -295,7 +294,7 @@ server.get("/api/pizza-of-the-day", async function getPizzaOfTheDay(req, res) {
         const pizzaSizesResult = await client.execute(
             `SELECT size, price
             FROM pizzas
-            WHERE pizza_type_id = ?`,
+            WHERE id = ?`,
             [pizza.id]
         );
 
@@ -475,19 +474,20 @@ server.get("/api/past-order/:order_id", async function getPastOrder(req, res) {
 
         const orderItemsResult = await client.execute(
             `SELECT 
-        t.pizza_type_id as pizzaTypeId, t.name, t.category, t.ingredients as description, o.quantity, p.price, o.quantity * p.price as total, p.size
-      FROM 
-        order_details o
-      JOIN
-        pizzas p
-      ON
-        o.pizza_id = p.pizza_id
-      JOIN
-        pizza_types t
-      ON
-        p.pizza_type_id = t.pizza_type_id
-      WHERE 
-        order_id = ?`,
+                t.id as pizzaTypeId, t.name, t.category, t.ingredients as description, 
+                o.quantity, p.price, o.quantity * p.price as total, p.size
+            FROM 
+                order_details o
+            JOIN
+                pizzas p
+            ON
+                o.pizza_id = p.pizza_id
+            JOIN
+                pizza_types t
+            ON
+                p.id = t.id
+            WHERE 
+                order_id = ?`,
             [orderId]
         );
 

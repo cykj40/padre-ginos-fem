@@ -11,7 +11,12 @@ const PizzaOfTheDay = () => {
   const pizzaOfTheDay = usePizzaOfTheDay();
 
   if (!pizzaOfTheDay) {
-    return <div>Loading...</div>;
+    return (
+      <div className="pizza-of-the-day">
+        <h2>Pizza of the Day</h2>
+        <div className="loading">Loading today's special...</div>
+      </div>
+    );
   }
 
   return (
@@ -21,15 +26,19 @@ const PizzaOfTheDay = () => {
         <div className="pizza-of-the-day-info">
           <h3>{pizzaOfTheDay.name}</h3>
           <p>{pizzaOfTheDay.description}</p>
-          <p className="pizza-of-the-day-price">
-            From: <span>{intl.format(pizzaOfTheDay.sizes.S)}</span>
-          </p>
+          {pizzaOfTheDay.sizes && (
+            <p className="pizza-of-the-day-price">
+              From: <span>{intl.format(pizzaOfTheDay.sizes.S)}</span>
+            </p>
+          )}
         </div>
-        <img
-          className="pizza-of-the-day-image"
-          src={getImageUrl(pizzaOfTheDay.image)}
-          alt={pizzaOfTheDay.name}
-        />
+        {pizzaOfTheDay.image && (
+          <img
+            className="pizza-of-the-day-image"
+            src={getImageUrl(pizzaOfTheDay.image)}
+            alt={pizzaOfTheDay.name}
+          />
+        )}
       </div>
     </div>
   );

@@ -23,23 +23,30 @@ export default defineConfig(({ command, mode }) => {
   return {
     server: {
       port: 5173,
-      proxy: !isProduction ? {
-        "/api": {
+      proxy: {
+        '/api': {
           target: apiUrl,
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path) => path.replace(/^\/api/, '')
+          changeOrigin: true
         },
-        "/public": {
+        '/public': {
           target: apiUrl,
-          changeOrigin: true,
-          secure: false
+          changeOrigin: true
         }
-      } : undefined
+      }
     },
     preview: {
       port: 5173,
-      host: true
+      host: true,
+      proxy: {
+        '/api': {
+          target: apiUrl,
+          changeOrigin: true
+        },
+        '/public': {
+          target: apiUrl,
+          changeOrigin: true
+        }
+      }
     },
     build: {
       outDir: 'dist',
