@@ -93,7 +93,7 @@ server.register(cors, {
         cb(new Error('Not allowed by CORS'), false);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Forwarded-For'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Forwarded-For', 'X-Request-ID'],
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
     credentials: true,
     maxAge: 86400, // 24 hours
