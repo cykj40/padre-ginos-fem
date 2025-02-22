@@ -108,12 +108,22 @@ server.register(fastifyStatic, {
     maxAge: process.env.NODE_ENV === 'production' ? 86400000 : 0, // 1 day cache in production
     decorateReply: true,
     serveDotFiles: false,
-    setHeaders: (res) => {
+    setHeaders: (res, pathName) => {
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
         res.setHeader('Cache-Control', 'public, max-age=86400');
         res.setHeader('Vary', 'Origin');
-        res.setHeader('Content-Type', 'image/webp');
+
+        // Set correct Content-Type based on file extension
+        if (pathName.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        } else if (pathName.endsWith('.webp')) {
+            res.setHeader('Content-Type', 'image/webp');
+        } else if (pathName.endsWith('.ttf')) {
+            res.setHeader('Content-Type', 'font/ttf');
+        } else if (pathName.endsWith('.svg')) {
+            res.setHeader('Content-Type', 'image/svg+xml');
+        }
     }
 });
 
