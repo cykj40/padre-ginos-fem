@@ -14,7 +14,6 @@ export const Route = createLazyFileRoute("/order")({
 const intl = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
-
 });
 
 export default function Order() {
@@ -28,6 +27,11 @@ export default function Order() {
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [orderId, setOrderId] = useState(null);
   
+  // Debug logging for cart state
+  useEffect(() => {
+    console.log("Current cart state:", cart);
+  }, [cart]);
+  
   async function checkout() {
     if (cart.length === 0) {
       setError("Your cart is empty. Please add items before checking out.");
@@ -38,6 +42,7 @@ export default function Order() {
     setError(null);
     
     try {
+      console.log("Sending checkout request with cart:", cart);
       const response = await fetchApi("api/order", {
         method: "POST",
         body: JSON.stringify({ cart }),
@@ -58,30 +63,54 @@ export default function Order() {
     }
   }
 
-  let selectedPizza, price, formattedPrice;
+  // Move calculation of selectedPizza, price, and formattedPrice to useEffect
+  const [selectedPizza, setSelectedPizza] = useState(null);
+  const [price, setPrice] = useState(null);
+  const [formattedPrice, setFormattedPrice] = useState("");
   
-  // Calculate these values directly in the render function
-  if (!loading && pizzaTypes.length > 0) {
-    const pizzaTypeNum = Number(pizzaType);
-    selectedPizza = pizzaTypes.find((pizza) => pizza.id === pizzaTypeNum);
-    price = selectedPizza?.sizes ? selectedPizza.sizes[pizzaSize] : null;
-    formattedPrice = price ? intl.format(price) : "";
-  }
+  // Calculate these values in a useEffect to avoid timing issues
+  useEffect(() => {
+    if (!loading && pizzaTypes.length > 0) {
+      const pizzaTypeNum = Number(pizzaType);
+      const foundPizza = pizzaTypes.find((pizza) => pizza.id === pizzaTypeNum);
+      setSelectedPizza(foundPizza);
+      
+      const pizzaPrice = foundPizza?.sizes ? foundPizza.sizes[pizzaSize] : null;
+      setPrice(pizzaPrice);
+      
+      const formatted = pizzaPrice ? intl.format(pizzaPrice) : "";
+      setFormattedPrice(formatted);
+      
+      console.log("Pizza selection updated:", { 
+        pizzaType, 
+        pizzaSize, 
+        foundPizza, 
+        pizzaPrice, 
+        formatted 
+      });
+    }
+  }, [pizzaType, pizzaSize, pizzaTypes, loading]);
 
   async function fetchPizzaTypes() {
     try {
+      console.log("Fetching pizza types...");
       const pizzasData = await fetchApi('api/pizzas');
+      console.log("Received pizza data:", pizzasData);
+      
       // Process image URLs
       const processedPizzas = pizzasData.map(pizza => ({
         ...pizza,
         image: getImageUrl(pizza.image)
       }));
       setPizzaTypes(processedPizzas);
+      
       // Set initial pizza type to the first pizza's ID if available
       if (processedPizzas.length > 0) {
         setPizzaType(String(processedPizzas[0].id));
+        console.log("Set initial pizza type to:", processedPizzas[0].id);
       }
     } catch (err) {
+      console.error("Error fetching pizzas:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -96,6 +125,26 @@ export default function Order() {
     // Show error as a notification but don't block the UI
     console.warn("Application error:", error);
   }
+
+  // Function to handle adding to cart
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    console.log("Add to cart clicked", { selectedPizza, price, pizzaSize });
+    
+    if (!selectedPizza || !price) {
+      console.log("Cannot add to cart:", { selectedPizza, price });
+      return;
+    }
+    
+    const cartItem = {
+      pizza: selectedPizza,
+      size: pizzaSize,
+      price: price // Store the actual numeric price, not the formatted string
+    };
+    
+    console.log("Adding to cart:", cartItem);
+    setCart([...cart, cartItem]);
+  };
 
   return (
     <div className="order">
@@ -208,22 +257,7 @@ export default function Order() {
             </div>
             <button 
               type="button" 
-              onClick={(e) => {
-                e.preventDefault();
-                if (!selectedPizza || !price) {
-                  console.log("Cannot add to cart:", { selectedPizza, price });
-                  return;
-                }
-                
-                const cartItem = {
-                  pizza: selectedPizza,
-                  size: pizzaSize,
-                  price: price // Store the actual numeric price, not the formatted string
-                };
-                
-                console.log("Adding to cart:", cartItem);
-                setCart([...cart, cartItem]);
-              }}
+              onClick={handleAddToCart}
               disabled={loading || !selectedPizza}
               style={{
                 display: "block",
