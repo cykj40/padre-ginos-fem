@@ -22,6 +22,9 @@ export default function Order() {
   const [cart, setCart] = useContext(CartContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedPizza, setSelectedPizza] = useState(null);
+  const [price, setPrice] = useState(null);
+  const [formattedPrice, setFormattedPrice] = useState("");
     
   async function checkout() {
     setLoading(true);
@@ -38,13 +41,24 @@ export default function Order() {
     }
   }
 
-  let price, formattedPrice, selectedPizza;
-  if (!loading) {
-    const pizzaTypeNum = Number(pizzaType);
-    selectedPizza = pizzaTypes.find((pizza) => pizza.id === pizzaTypeNum);
-    price = selectedPizza?.sizes ? selectedPizza.sizes[pizzaSize] : null;
-    formattedPrice = price ? intl.format(price) : "";
-  }
+  // Update selectedPizza and price when dependencies change
+  useEffect(() => {
+    if (!loading && pizzaTypes.length > 0) {
+      const pizzaTypeNum = Number(pizzaType);
+      const foundPizza = pizzaTypes.find((pizza) => pizza.id === pizzaTypeNum);
+      setSelectedPizza(foundPizza);
+      const newPrice = foundPizza?.sizes ? foundPizza.sizes[pizzaSize] : null;
+      setPrice(newPrice);
+      setFormattedPrice(newPrice ? intl.format(newPrice) : "");
+      
+      console.log("Pizza selection updated:", {
+        pizzaTypeNum,
+        foundPizza,
+        newPrice,
+        formattedPrice: newPrice ? intl.format(newPrice) : ""
+      });
+    }
+  }, [pizzaType, pizzaSize, pizzaTypes, loading]);
 
   async function fetchPizzaTypes() {
     try {
@@ -85,6 +99,15 @@ export default function Order() {
     console.log("Adding to cart:", cartItem);
     setCart([...cart, cartItem]);
   }
+
+  // Debug useEffect to trace state changes
+  useEffect(() => {
+    console.log("State updated:", {
+      selectedPizza: selectedPizza?.name,
+      price,
+      formattedPrice
+    });
+  }, [selectedPizza, price, formattedPrice]);
 
   if (error) {
     return <div className="error">Error: {error}</div>;
