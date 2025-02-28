@@ -38,10 +38,11 @@ export default function Order() {
     }
   }
 
-  let price, selectedPizza;
+  let price, formattedPrice, selectedPizza;
   if (!loading) {
     selectedPizza = pizzaTypes.find((pizza) => pizza.id === Number(pizzaType));
-    price = selectedPizza?.sizes ? intl.format(selectedPizza.sizes[pizzaSize]) : "";
+    price = selectedPizza?.sizes ? selectedPizza.sizes[pizzaSize] : null;
+    formattedPrice = price ? intl.format(price) : "";
   }
 
   async function fetchPizzaTypes() {
@@ -71,7 +72,7 @@ export default function Order() {
   function handleSubmit(e) {
     e.preventDefault();
     if (!selectedPizza) return;
-    setCart([...cart, { pizza: selectedPizza, size: pizzaSize, price }]);
+    setCart([...cart, { pizza: selectedPizza, size: pizzaSize, price: price }]);
   }
 
   if (error) {
@@ -150,7 +151,7 @@ export default function Order() {
               description={selectedPizza.description}
               image={selectedPizza.image}
             />
-            <p>{price}</p>
+            <p>{formattedPrice}</p>
           </div>
         ) : null}
         {loading ? <h2>Loading cart...</h2> : <Cart checkout={checkout} cart={cart} />}
