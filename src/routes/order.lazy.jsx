@@ -22,22 +22,35 @@ export default function Order() {
   const [cart, setCart] = useContext(CartContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [checkoutInProgress, setCheckoutInProgress] = useState(false);
+  const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   
   async function checkout() {
-    setLoading(true);
+    if (cart.length === 0) {
+      setError("Your cart is empty. Please add items before checking out.");
+      return;
+    }
+    
+    setCheckoutInProgress(true);
+    setError(null);
+    
     try {
-      await fetchApi("api/order", {
+      const response = await fetchApi("api/order", {
         method: "POST",
         body: JSON.stringify({ cart }),
       });
+      
+      console.log("Checkout successful:", response);
       setCart([]);
+      setCheckoutSuccess(true);
+      setTimeout(() => setCheckoutSuccess(false), 3000);
     } catch (err) {
       console.error("Checkout error:", err.message);
       // Still clear the cart even if the API fails
       setCart([]);
       setError("Checkout completed, but there was a server error. Your order has been received.");
     } finally {
-      setLoading(false);
+      setCheckoutInProgress(false);
     }
   }
 
@@ -83,7 +96,8 @@ export default function Order() {
   return (
     <div className="order">
       <h2>Create Order</h2>
-      {error && <div className="error-notification">{error}</div>}
+      {error && <div className="error-notification" style={{ color: "red", padding: "10px", margin: "10px 0", backgroundColor: "#ffeeee", borderRadius: "4px" }}>{error}</div>}
+      {checkoutSuccess && <div className="success-notification" style={{ color: "green", padding: "10px", margin: "10px 0", backgroundColor: "#eeffee", borderRadius: "4px" }}>Order placed successfully! Check your past orders to see details.</div>}
       <form onSubmit={(e) => e.preventDefault()}>
         <div className="order-form" style={{ maxWidth: "800px", margin: "0 auto" }}>
           <div style={{ textAlign: "center" }}>
@@ -183,7 +197,7 @@ export default function Order() {
                 const cartItem = {
                   pizza: selectedPizza,
                   size: pizzaSize,
-                  price: formattedPrice
+                  price: price // Store the actual numeric price, not the formatted string
                 };
                 
                 console.log("Adding to cart:", cartItem);
@@ -217,7 +231,31 @@ export default function Order() {
               <p>{formattedPrice}</p>
             </div>
           ) : null}
-          {loading ? <h2>Loading cart...</h2> : <Cart checkout={checkout} cart={cart} />}
+          {loading ? <h2>Loading cart...</h2> : (
+            <div>
+              <Cart checkout={checkout} cart={cart} />
+              {cart.length > 0 && (
+                <div style={{ textAlign: "center", marginTop: "20px" }}>
+                  <button 
+                    onClick={checkout}
+                    disabled={checkoutInProgress || cart.length === 0}
+                    style={{
+                      padding: "12px 24px",
+                      backgroundColor: "#2ecc71",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      fontSize: "18px",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {checkoutInProgress ? "Processing..." : "Checkout"}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </form>
     </div>

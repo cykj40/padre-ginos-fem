@@ -8,8 +8,17 @@ export default function Cart({cart, checkout}) {
     for (let i = 0; i < cart.length; i++) {
         const current = cart[i];
         total += current.pizza.sizes[current.size]
-
     }
+    
+    if (cart.length === 0) {
+        return (
+            <div className="cart">
+                <h2>Cart</h2>
+                <p>Your cart is empty. Add some pizzas!</p>
+            </div>
+        );
+    }
+    
     return (
         <div className="cart">
             <h2>Cart</h2>
@@ -18,12 +27,11 @@ export default function Cart({cart, checkout}) {
                     <li key={index}>
                         <span className="size">{item.size}</span> - 
                         <span className="type">{item.pizza.name}</span> - 
-                        <span className="price">{item.price}</span>
+                        <span className="price">{intl.format(item.pizza.sizes[item.size])}</span>
                     </li>
                 ))}
             </ul>
             <p>Total: {intl.format(total)}</p>
-            <button onClick={checkout}>Checkout</button>
         </div>
     )
 }
