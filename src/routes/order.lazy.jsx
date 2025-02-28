@@ -54,9 +54,9 @@ export default function Order() {
         image: getImageUrl(pizza.image)
       }));
       setPizzaTypes(processedPizzas);
-      // Set initial pizza type to the first pizza's ID
+      // Set initial pizza type to the first pizza's ID if available
       if (processedPizzas.length > 0) {
-        setPizzaType(String(processedPizzas[0].id));
+        setPizzaType(processedPizzas[0].id.toString());
       }
     } catch (err) {
       setError(err.message);
@@ -93,7 +93,7 @@ export default function Order() {
               disabled={loading}
             >
               {pizzaTypes.map((pizza) => (
-                <option key={pizza.id} value={pizza.id}>
+                <option key={pizza.id} value={pizza.id.toString()}>
                   {pizza.name}
                 </option>
               ))}
