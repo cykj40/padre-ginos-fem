@@ -4,6 +4,7 @@ import Pizza from "../Pizza";
 import Cart from "../Cart";
 import { CartContext } from "../contexts";
 import { fetchApi, getImageUrl } from "../api/config";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/order")({
   component: Order,
@@ -25,6 +26,7 @@ export default function Order() {
   const [error, setError] = useState(null);
   const [checkoutInProgress, setCheckoutInProgress] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
+  const [orderId, setOrderId] = useState(null);
   
   async function checkout() {
     if (cart.length === 0) {
@@ -42,9 +44,10 @@ export default function Order() {
       });
       
       console.log("Checkout successful:", response);
+      setOrderId(response.orderId);
       setCart([]);
       setCheckoutSuccess(true);
-      setTimeout(() => setCheckoutSuccess(false), 3000);
+      setTimeout(() => setCheckoutSuccess(false), 5000);
     } catch (err) {
       console.error("Checkout error:", err.message);
       // Still clear the cart even if the API fails
@@ -98,7 +101,24 @@ export default function Order() {
     <div className="order">
       <h2>Create Order</h2>
       {error && <div className="error-notification" style={{ color: "red", padding: "10px", margin: "10px 0", backgroundColor: "#ffeeee", borderRadius: "4px" }}>{error}</div>}
-      {checkoutSuccess && <div className="success-notification" style={{ color: "green", padding: "10px", margin: "10px 0", backgroundColor: "#eeffee", borderRadius: "4px" }}>Order placed successfully! Check your past orders to see details.</div>}
+      {checkoutSuccess && (
+        <div className="success-notification" style={{ color: "green", padding: "15px", margin: "10px 0", backgroundColor: "#eeffee", borderRadius: "4px", border: "1px solid #ccddcc" }}>
+          <p style={{ fontWeight: "bold", marginBottom: "10px" }}>Order placed successfully! {orderId && `Order #${orderId}`}</p>
+          <p>Your order has been added to your past orders.</p>
+          <Link to="/past" style={{ 
+            display: "inline-block", 
+            marginTop: "10px", 
+            padding: "8px 16px", 
+            backgroundColor: "#2ecc71", 
+            color: "white", 
+            textDecoration: "none", 
+            borderRadius: "4px",
+            fontWeight: "bold"
+          }}>
+            View Past Orders
+          </Link>
+        </div>
+      )}
       <form onSubmit={(e) => e.preventDefault()}>
         <div className="order-form" style={{ maxWidth: "800px", margin: "0 auto" }}>
           <div style={{ textAlign: "center" }}>
