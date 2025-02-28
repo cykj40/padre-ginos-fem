@@ -1,29 +1,20 @@
 import { useState, useEffect, useDebugValue } from "react";
-import { fetchApi } from './api/config';
 
 export const usePizzaOfTheDay = () => {
   const [pizzaOfTheDay, setPizzaOfTheDay] = useState(null);
-  const [error, setError] = useState(null);
 
   useDebugValue(pizzaOfTheDay ? `${pizzaOfTheDay.name}` : "Loading...");
 
   useEffect(() => {
     async function fetchPizzaOfTheDay() {
-      try {
-        const data = await fetchApi('api/pizza-of-the-day');
-        setPizzaOfTheDay(data);
-      } catch (err) {
-        console.error('Error fetching pizza of the day:', err);
-        setError(err.message);
-      }
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/api/pizza-of-the-day`);
+      const data = await response.json();
+      setPizzaOfTheDay(data);
     }
 
     fetchPizzaOfTheDay();
   }, []);
-
-  if (error) {
-    throw new Error(`Failed to load pizza of the day: ${error}`);
-  }
 
   return pizzaOfTheDay;
 };

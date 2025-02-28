@@ -47,15 +47,22 @@ export function getImageUrl(path) {
     return `${baseUrl}/public/${cleanPath}`;
 }
 
+// Maximum number of retries for API calls
+const MAX_RETRIES = 1;
+// Delay between retries in milliseconds
+const RETRY_DELAY = 1000;
+
 export async function fetchApi(path, options = {}) {
     const url = getFullUrl(path);
     const requestId = Math.random().toString(36).substring(7);
+    const { retries = 0 } = options;
 
     console.log(`[${requestId}] Starting API request:`, {
         url,
         method: options.method || 'GET',
         path,
-        baseUrl: API_URL
+        baseUrl: API_URL,
+        retryAttempt: retries
     });
 
     try {
@@ -119,6 +126,24 @@ export async function fetchApi(path, options = {}) {
             error: error.message,
             stack: error.stack
         });
+
+        // Retry logic for connection errors
+        if (retries < MAX_RETRIES &&
+            (error.message.includes('Failed to fetch') ||
+                error.message.includes('NetworkError') ||
+                error.message.includes('Network request failed'))) {
+            console.log(`[${requestId}] Retrying request (${retries + 1}/${MAX_RETRIES})...`);
+
+            // Wait before retrying
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+
+            // Retry with incremented retry count
+            return fetchApi(path, {
+                ...options,
+                retries: retries + 1
+            });
+        }
+
         throw error;
     }
 } 
