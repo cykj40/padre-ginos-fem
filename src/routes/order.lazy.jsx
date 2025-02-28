@@ -75,23 +75,6 @@ export default function Order() {
     fetchPizzaTypes();
   }, []);
   
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (!selectedPizza || !price) {
-      console.log("Cannot add to cart:", { selectedPizza, price });
-      return;
-    }
-    
-    const cartItem = {
-      pizza: selectedPizza,
-      size: pizzaSize,
-      price: formattedPrice
-    };
-    
-    console.log("Adding to cart:", cartItem);
-    setCart([...cart, cartItem]);
-  }
-
   if (error) {
     // Show error as a notification but don't block the UI
     console.warn("Application error:", error);
@@ -101,17 +84,34 @@ export default function Order() {
     <div className="order">
       <h2>Create Order</h2>
       {error && <div className="error-notification">{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="order-form">
-          <div>
+      <form onSubmit={(e) => e.preventDefault()}>
+        <div className="order-form" style={{ maxWidth: "800px", margin: "0 auto" }}>
+          <div style={{ textAlign: "center" }}>
             <div>
-              <label htmlFor="pizza-type">Pizza Type</label>
+              <label 
+                htmlFor="pizza-type" 
+                style={{ 
+                  display: "block", 
+                  marginBottom: "5px", 
+                  fontSize: "18px", 
+                  fontWeight: "bold" 
+                }}
+              >
+                Pizza Type
+              </label>
               <select
                 onChange={(e) => setPizzaType(e.target.value)}
                 name="pizza-type"
                 value={pizzaType}
                 disabled={loading}
-                style={{ maxWidth: "300px" }}
+                style={{ 
+                  maxWidth: "300px", 
+                  display: "block", 
+                  margin: "0 auto 15px",
+                  padding: "8px 12px",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc"
+                }}
               >
                 {pizzaTypes.map((pizza) => (
                   <option key={pizza.id} value={pizza.id}>
@@ -121,8 +121,18 @@ export default function Order() {
               </select>
             </div>
             <div>
-              <label htmlFor="pizza-size">Pizza Size</label>
-              <div>
+              <label 
+                htmlFor="pizza-size"
+                style={{ 
+                  display: "block", 
+                  marginBottom: "5px", 
+                  fontSize: "18px", 
+                  fontWeight: "bold" 
+                }}
+              >
+                Pizza Size
+              </label>
+              <div style={{ display: "flex", justifyContent: "center", gap: "20px", margin: "10px 0" }}>
                 <span>
                   <input
                     onChange={(e) => setPizzaSize(e.target.value)}
@@ -162,8 +172,35 @@ export default function Order() {
               </div>
             </div>
             <button 
-              type="submit" 
+              type="button" 
+              onClick={(e) => {
+                e.preventDefault();
+                if (!selectedPizza || !price) {
+                  console.log("Cannot add to cart:", { selectedPizza, price });
+                  return;
+                }
+                
+                const cartItem = {
+                  pizza: selectedPizza,
+                  size: pizzaSize,
+                  price: formattedPrice
+                };
+                
+                console.log("Adding to cart:", cartItem);
+                setCart([...cart, cartItem]);
+              }}
               disabled={loading || !selectedPizza}
+              style={{
+                display: "block",
+                margin: "15px auto",
+                padding: "10px 20px",
+                backgroundColor: "#e74c3c",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "16px"
+              }}
             >
               Add to Cart
             </button>
