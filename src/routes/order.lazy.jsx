@@ -13,6 +13,7 @@ export const Route = createLazyFileRoute("/order")({
 const intl = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
+
 });
 
 export default function Order() {
