@@ -9,6 +9,10 @@ export default function Pizza({ pizza, detailed = false }) {
     const { format } = useCurrency();
     const [added, setAdded] = useState(false);
 
+    if (!pizza) {
+        return <div className="pizza loading-spinner">Loading pizza...</div>;
+    }
+
     const handleAddToCart = () => {
         const newItem = {
             id: Date.now(),
@@ -17,7 +21,7 @@ export default function Pizza({ pizza, detailed = false }) {
             crust: 'regular',
             toppings: [],
             quantity: 1,
-            price: pizza.price
+            price: pizza?.price || 0
         };
 
         setCart([...cart, newItem]);
@@ -28,19 +32,24 @@ export default function Pizza({ pizza, detailed = false }) {
         }, 2000);
     };
 
+    const description = pizza?.description || 'A delicious pizza';
+    const displayDescription = detailed
+        ? description
+        : (description.substring(0, 100) + '...');
+
     return (
         <div className="pizza">
             <div>
-                <img src={pizza.image || '/assets/pizzas/veggie.webp'} alt={pizza.name} />
+                <img src={pizza.image || '/assets/pizzas/veggie.webp'} alt={pizza.name || 'Pizza'} />
             </div>
             <div>
-                <h1>{pizza.name}</h1>
-                <p>{detailed ? pizza.description : pizza.description.substring(0, 100) + '...'}</p>
-                <p>{format(pizza.price)}</p>
+                <h1>{pizza.name || 'Delicious Pizza'}</h1>
+                <p>{displayDescription}</p>
+                <p>{format(pizza?.price || 0)}</p>
 
                 {detailed && (
                     <>
-                        <p><strong>Ingredients:</strong> {pizza.ingredients.join(', ')}</p>
+                        <p><strong>Ingredients:</strong> {(pizza.ingredients || []).join(', ')}</p>
                         {pizza.vegetarian && <p><strong>Vegetarian</strong></p>}
                         {pizza.spicy && <p><strong>Spicy</strong></p>}
                     </>

@@ -13,6 +13,10 @@ export default function useCurrency(locale = 'en-US', currency = 'USD') {
     }, [locale, currency]);
 
     const format = (value) => {
+        // Handle undefined, null, or invalid values
+        if (value === undefined || value === null || isNaN(value)) {
+            return formatter.format(0);
+        }
         return formatter.format(value);
     };
 

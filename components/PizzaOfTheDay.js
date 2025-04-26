@@ -19,7 +19,7 @@ export default function PizzaOfTheDay({ pizza }) {
             crust: 'regular',
             toppings: [],
             quantity: 1,
-            price: pizza.price
+            price: pizza?.price || 0
         };
 
         setCart([...cart, newItem]);
@@ -41,13 +41,13 @@ export default function PizzaOfTheDay({ pizza }) {
                 <div className="pizza-image">
                     <img
                         src={pizza.image || '/assets/pizzas/napolitana.webp'}
-                        alt={pizza.name}
+                        alt={pizza.name || 'Pizza of the Day'}
                     />
                 </div>
                 <div className="pizza-details">
-                    <h3>{pizza.name}</h3>
-                    <p>{pizza.description}</p>
-                    <p className="price">{format(pizza.price)}</p>
+                    <h3>{pizza.name || 'Special Pizza'}</h3>
+                    <p>{pizza.description || 'A delicious special pizza for today.'}</p>
+                    <p className="price">{format(pizza.price || 0)}</p>
                     <div className="action-buttons">
                         <button onClick={handleAddToCart}>Add to Cart</button>
                         <Link href="/menu" className="view-menu-btn">
