@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { CartContext } from '../contexts';
+import useCurrency from '../../hooks/useCurrency';
 
 export default function Cart() {
     const [cart, setCart] = useContext(CartContext);
+    const { format } = useCurrency();
     const [orderInfo, setOrderInfo] = useState({
         name: '',
         address: '',
@@ -32,13 +34,18 @@ export default function Cart() {
     };
 
     const calculateTotal = () => {
-        return cart.reduce((total, item) => total + item.price, 0).toFixed(2);
+        if (!cart || !cart.length) return 0;
+        const total = cart.reduce((total, item) => {
+            const price = Number(item?.price) || 0;
+            return total + price;
+        }, 0);
+        return total;
     };
 
     const handleSubmitOrder = async (e) => {
         e.preventDefault();
 
-        if (cart.length === 0) {
+        if (!cart || cart.length === 0) {
             alert('Your cart is empty!');
             return;
         }
@@ -90,13 +97,16 @@ export default function Cart() {
         );
     }
 
+    const safeCart = cart || [];
+    const total = calculateTotal();
+
     return (
         <>
             <div className="cart">
                 <Header />
                 <h2>Your Cart</h2>
 
-                {cart.length === 0 ? (
+                {safeCart.length === 0 ? (
                     <p>Your cart is empty. <a href="/menu">Go to Menu</a></p>
                 ) : (
                     <>
@@ -113,14 +123,14 @@ export default function Cart() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {cart.map(item => (
-                                    <tr key={item.id}>
-                                        <td>{item.pizza.name}</td>
-                                        <td>{item.size}</td>
-                                        <td>{item.crust}</td>
-                                        <td>{item.toppings.length > 0 ? item.toppings.join(', ') : 'None'}</td>
-                                        <td>{item.quantity}</td>
-                                        <td>${item.price.toFixed(2)}</td>
+                                {safeCart.map(item => (
+                                    <tr key={item.id || Math.random().toString()}>
+                                        <td>{item?.pizza?.name || 'Pizza'}</td>
+                                        <td>{item?.size || 'Medium'}</td>
+                                        <td>{item?.crust || 'Regular'}</td>
+                                        <td>{item?.toppings?.length > 0 ? item.toppings.join(', ') : 'None'}</td>
+                                        <td>{item?.quantity || 1}</td>
+                                        <td>{format(Number(item?.price) || 0)}</td>
                                         <td>
                                             <button onClick={() => handleRemoveItem(item.id)}>Remove</button>
                                         </td>
@@ -128,7 +138,7 @@ export default function Cart() {
                                 ))}
                                 <tr>
                                     <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>Total:</td>
-                                    <td colSpan="2" style={{ fontWeight: 'bold' }}>${calculateTotal()}</td>
+                                    <td colSpan="2" style={{ fontWeight: 'bold' }}>{format(total)}</td>
                                 </tr>
                             </tbody>
                         </table>
