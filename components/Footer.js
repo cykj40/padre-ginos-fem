@@ -1,14 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import '../styles/footer.css';
 
 export default function Footer() {
     return (
         <footer className="footer">
             <div className="footer-content">
                 <div className="footer-section">
-                    <h3>Padre Gino's</h3>
+                    <h3>Papa Giorgio's</h3>
                     <p>Authentic Italian pizza since 1978</p>
                     <p>123 Pizza Street, Flavortown, CA 90210</p>
                     <p>Phone: (555) 123-4567</p>
@@ -42,7 +41,7 @@ export default function Footer() {
             </div>
 
             <div className="footer-bottom">
-                <p>&copy; {new Date().getFullYear()} Padre Gino's. All rights reserved.</p>
+                <p>&copy; {new Date().getFullYear()} Papa Giorgio's. All rights reserved.</p>
             </div>
         </footer>
     );
