@@ -1,15 +1,11 @@
 [build]
   command = "npm run build"
-  publish = ".next"
+  publish = "out"
 
 [build.environment]
   NODE_VERSION = "18"
   NEXT_PUBLIC_API_URL = "https://padre-ginos-fem.onrender.com"
   NPM_FLAGS = "--legacy-peer-deps"
-
-# Use the Netlify Next.js plugin
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
 
 # Redirect API requests to the backend
 [[redirects]]
@@ -27,10 +23,10 @@
   force = true
   headers = {Access-Control-Allow-Origin = "*", Cache-Control = "public, max-age=86400"}
 
-# This redirect is needed for Next.js client-side routing
+# For single-page app
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/nextjs-server"
+  to = "/index.html"
   status = 200
 
 # Set security headers for all routes

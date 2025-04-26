@@ -30,6 +30,8 @@ dist-ssr
 
 # Next.js
 .next
+# Next.js static export
+out
 
 # Node.js
 node_modules
