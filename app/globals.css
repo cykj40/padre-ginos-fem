@@ -96,6 +96,8 @@ button:hover {
 .logo {
     height: 60px;
     width: auto;
+    border-radius: 50%;
+    object-fit: contain;
 }
 
 .logo-text {
