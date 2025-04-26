@@ -33,7 +33,7 @@ export default function Menu() {
                     {pizzas && pizzas.map(pizza => (
                         <div key={pizza.id} className="menu-item">
                             <img
-                                src={pizza.image || '/assets/pizza-placeholder.jpg'}
+                                src={pizza.image || '/assets/pizzas/veggie.webp'}
                                 alt={pizza.name}
                             />
                             <div className="menu-item-content">

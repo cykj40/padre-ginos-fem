@@ -31,7 +31,7 @@ export default function Pizza({ pizza, detailed = false }) {
     return (
         <div className="pizza">
             <div>
-                <img src={pizza.image || '/assets/pizza-placeholder.jpg'} alt={pizza.name} />
+                <img src={pizza.image || '/assets/pizzas/veggie.webp'} alt={pizza.name} />
             </div>
             <div>
                 <h1>{pizza.name}</h1>

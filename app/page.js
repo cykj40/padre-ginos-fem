@@ -27,34 +27,45 @@ export default function Home() {
     }, []);
 
     return (
-        <>
+        <main>
             <Header />
-            <div className="index">
-                <h1>Padre Gino&apos;s Pizza</h1>
-                <div className="index-brand">
-                    <p>Welcome to Padre Gino&apos;s, where tradition meets taste! Our authentic recipes have been passed down through generations, ensuring every bite is a piece of culinary history.</p>
-                </div>
-                {loading ? (
-                    <div>Loading...</div>
-                ) : (
-                    <PizzaOfTheDay pizza={pizzaData} />
-                )}
-                <ul>
-                    <li>
-                        <Link href="/menu">Menu</Link>
-                    </li>
-                    <li>
-                        <Link href="/order">Order</Link>
-                    </li>
-                    <li>
-                        <Link href="/past">Past Orders</Link>
-                    </li>
-                    <li>
-                        <Link href="/contact">Contact</Link>
-                    </li>
-                </ul>
+            <div className="container">
+                <section className="hero">
+                    <h1>Papa Giorgio&apos;s Pizza</h1>
+                    <div className="index-brand">
+                        <p>Welcome to Papa Giorgio&apos;s, where tradition meets taste! Our authentic recipes have been passed down through generations, ensuring every bite is a piece of culinary history.</p>
+                    </div>
+                </section>
+
+                <section>
+                    {loading ? (
+                        <div className="loading-spinner">Loading special offer...</div>
+                    ) : (
+                        <PizzaOfTheDay pizza={pizzaData} />
+                    )}
+                </section>
+
+                <section className="quick-links">
+                    <div className="container">
+                        <h2>Quick Links</h2>
+                        <ul>
+                            <li>
+                                <Link href="/menu">Our Menu</Link>
+                            </li>
+                            <li>
+                                <Link href="/order">Order Now</Link>
+                            </li>
+                            <li>
+                                <Link href="/past">Past Orders</Link>
+                            </li>
+                            <li>
+                                <Link href="/contact">Contact Us</Link>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
             </div>
             <Footer />
-        </>
+        </main>
     );
 } 

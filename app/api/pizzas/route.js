@@ -9,7 +9,7 @@ export async function GET() {
             name: 'Margherita',
             description: 'Classic pizza with tomato sauce, mozzarella, and fresh basil.',
             price: 10.99,
-            image: '/assets/pizza-margherita.jpg',
+            image: '/assets/pizzas/napolitana.webp',
             ingredients: ['Tomato sauce', 'Mozzarella', 'Fresh basil', 'Olive oil'],
             vegetarian: true,
             spicy: false
@@ -19,7 +19,7 @@ export async function GET() {
             name: 'Pepperoni',
             description: 'Traditional pizza topped with tomato sauce, mozzarella, and pepperoni slices.',
             price: 12.99,
-            image: '/assets/pizza-pepperoni.jpg',
+            image: '/assets/pizzas/pepperoni.webp',
             ingredients: ['Tomato sauce', 'Mozzarella', 'Pepperoni'],
             vegetarian: false,
             spicy: false
@@ -29,7 +29,7 @@ export async function GET() {
             name: 'Quattro Formaggi',
             description: 'Rich and creamy pizza with four different types of cheese.',
             price: 14.99,
-            image: '/assets/pizza-quattro-formaggi.jpg',
+            image: '/assets/pizzas/greek.webp',
             ingredients: ['Tomato sauce', 'Mozzarella', 'Gorgonzola', 'Parmesan', 'Ricotta'],
             vegetarian: true,
             spicy: false
@@ -39,7 +39,7 @@ export async function GET() {
             name: 'Diavola',
             description: 'Spicy pizza with hot salami, chili peppers, and mozzarella.',
             price: 13.99,
-            image: '/assets/pizza-diavola.jpg',
+            image: '/assets/pizzas/mexican.webp',
             ingredients: ['Tomato sauce', 'Mozzarella', 'Spicy salami', 'Chili peppers'],
             vegetarian: false,
             spicy: true
@@ -49,7 +49,7 @@ export async function GET() {
             name: 'Vegetariana',
             description: 'Healthy pizza loaded with a variety of fresh vegetables.',
             price: 11.99,
-            image: '/assets/pizza-vegetariana.jpg',
+            image: '/assets/pizzas/veggie.webp',
             ingredients: ['Tomato sauce', 'Mozzarella', 'Bell peppers', 'Mushrooms', 'Zucchini', 'Eggplant', 'Olives'],
             vegetarian: true,
             spicy: false
@@ -59,7 +59,7 @@ export async function GET() {
             name: 'Prosciutto e Funghi',
             description: 'Classic combination of ham and mushrooms on a tomato and cheese base.',
             price: 13.99,
-            image: '/assets/pizza-prosciutto-funghi.jpg',
+            image: '/assets/pizzas/mediterraneo.webp',
             ingredients: ['Tomato sauce', 'Mozzarella', 'Ham', 'Mushrooms'],
             vegetarian: false,
             spicy: false

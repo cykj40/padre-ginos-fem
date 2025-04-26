@@ -1,19 +1,10 @@
-import { CartProvider } from './contexts'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './globals.css'
+import Providers from './providers'
 
 export const metadata = {
-    title: 'Padre Gino\'s Pizza',
+    title: 'Papa Giorgio\'s Pizza',
     description: 'Delicious pizza delivered to your door',
 }
-
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            staleTime: 60 * 1000,
-        },
-    },
-})
 
 export default function RootLayout({ children }) {
     return (
@@ -24,11 +15,9 @@ export default function RootLayout({ children }) {
                 <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
             </head>
             <body>
-                <QueryClientProvider client={queryClient}>
-                    <CartProvider>
-                        {children}
-                    </CartProvider>
-                </QueryClientProvider>
+                <Providers>
+                    {children}
+                </Providers>
                 <div id="modal"></div>
             </body>
         </html>

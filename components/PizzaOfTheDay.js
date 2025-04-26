@@ -10,6 +10,8 @@ export default function PizzaOfTheDay({ pizza }) {
     const { format } = useCurrency();
 
     const handleAddToCart = () => {
+        if (!pizza) return;
+
         const newItem = {
             id: Date.now(),
             pizza,
@@ -23,14 +25,24 @@ export default function PizzaOfTheDay({ pizza }) {
         setCart([...cart, newItem]);
     };
 
-    if (!pizza) return null;
+    if (!pizza) {
+        return (
+            <div className="pizza-of-the-day">
+                <h2>Pizza of the Day</h2>
+                <div className="loading-spinner">Loading today's special...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="pizza-of-the-day">
-            <h2>Pizza of the Day</h2>
+            <h2>Pizza of the Day <span className="checkered"></span></h2>
             <div className="pizza-spotlight">
                 <div className="pizza-image">
-                    <img src={pizza.image || '/assets/pizza-placeholder.jpg'} alt={pizza.name} />
+                    <img
+                        src={pizza.image || '/assets/pizzas/napolitana.webp'}
+                        alt={pizza.name}
+                    />
                 </div>
                 <div className="pizza-details">
                     <h3>{pizza.name}</h3>
