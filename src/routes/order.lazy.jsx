@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { CartContext } from "../contexts";
+import { CartContext } from "../../app/contexts/CartContext";
 import Cart from "../Cart";
 import Pizza from "../Pizza";
 
@@ -20,7 +20,7 @@ function Order() {
   const [pizzaType, setPizzaType] = useState("pepperoni");
   const [pizzaSize, setPizzaSize] = useState("M");
   const [pizzaTypes, setPizzaTypes] = useState([]);
-  const [cart, setCart] = useContext(CartContext);
+  const { cart, addToCart, clearCart } = useContext(CartContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [checkoutInProgress, setCheckoutInProgress] = useState(false);
@@ -33,7 +33,7 @@ function Order() {
   }, [cart]);
   
   async function checkout() {
-    if (cart.length === 0) {
+    if (!cart.items || cart.items.length === 0) {
       setError("Your cart is empty. Please add items before checking out.");
       return;
     }
@@ -51,7 +51,7 @@ function Order() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          cart,
+          cart: cart.items,
         }),
       });
       
@@ -64,7 +64,7 @@ function Order() {
       saveOrderToLocalStorage(response.orderId || localOrderId);
       
       // Clear the cart and show success message
-      setCart([]);
+      clearCart();
       setCheckoutSuccess(true);
       setTimeout(() => setCheckoutSuccess(false), 5000);
     } catch (err) {
@@ -76,7 +76,7 @@ function Order() {
       saveOrderToLocalStorage(localOrderId);
       
       // Still clear the cart even if API fails
-      setCart([]);
+      clearCart();
       setCheckoutSuccess(true);
       setTimeout(() => setCheckoutSuccess(false), 5000);
     } finally {
@@ -91,8 +91,8 @@ function Order() {
       const newOrder = {
         id: id,
         date: new Date().toISOString(),
-        items: cart,
-        total: cart.reduce((sum, item) => sum + (item.pizza.sizes[item.size] || 0), 0)
+        items: cart.items,
+        total: cart.total
       };
       
       localStorage.setItem('pastOrders', JSON.stringify([newOrder, ...pastOrders]));
@@ -201,15 +201,17 @@ function Order() {
     try {
       // Create a cart item with the expected structure
       const cartItem = {
-        pizza: selectedPizza,
+        pizzaId: selectedPizza.id,
+        name: selectedPizza.name,
         size: pizzaSize,
         price: selectedPizza.sizes[pizzaSize],
         quantity: 1,
-        addedAt: new Date().toISOString()
+        crust: 'regular',
+        toppings: []
       };
       
       // Add to cart
-      setCart([...cart, cartItem]);
+      addToCart(cartItem);
       
       // Show a brief success message
       const successMsg = document.createElement('div');
@@ -376,12 +378,12 @@ function Order() {
             {loading ? <h2>Loading cart...</h2> : (
               <div>
                 <Cart cart={cart} />
-                {cart.length > 0 && (
+                {cart.items.length > 0 && (
                   <div style={{ textAlign: "center", marginTop: "20px" }}>
                     <button 
                       type="button"
                       onClick={checkout}
-                      disabled={checkoutInProgress || cart.length === 0}
+                      disabled={checkoutInProgress || cart.items.length === 0}
                       style={{
                         padding: "12px 24px",
                         backgroundColor: "#2ecc71",

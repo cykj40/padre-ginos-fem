@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import { CartContext } from '../contexts';
+import { CartContext } from '../contexts/CartContext';
 import useCurrency from '../../hooks/useCurrency';
 
 // Fallback pizza data for static rendering
@@ -33,7 +33,7 @@ const FALLBACK_PIZZAS = [
 ];
 
 export default function Order() {
-    const [cart, setCart] = useContext(CartContext);
+    const { cart, addToCart } = useContext(CartContext);
     const router = useRouter();
     const { format } = useCurrency();
     const [order, setOrder] = useState({
@@ -98,8 +98,8 @@ export default function Order() {
         if (!selectedPizza) return;
 
         const newItem = {
-            id: Date.now(),
-            pizza: selectedPizza,
+            pizzaId: selectedPizza.id,
+            name: selectedPizza.name,
             size: order.size,
             crust: order.crust,
             toppings: order.toppings,
@@ -107,7 +107,7 @@ export default function Order() {
             price: calculatePrice()
         };
 
-        setCart([...cart, newItem]);
+        addToCart(newItem);
 
         // Reset form
         setOrder({

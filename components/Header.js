@@ -2,11 +2,11 @@
 
 import { useContext } from 'react';
 import Link from 'next/link';
-import { CartContext } from '../app/contexts';
+import { CartContext } from '../app/contexts/CartContext';
 
 export default function Header() {
-    const [cart] = useContext(CartContext);
-    const cartCount = cart?.length || 0;
+    const { cart } = useContext(CartContext);
+    const cartCount = cart?.items?.length || 0;
 
     return (
         <header className="main-header">
@@ -30,7 +30,7 @@ export default function Header() {
                         </li>
                         <li className="cart-link">
                             <Link href="/cart">
-                                Cart <span className="cart-count">{cartCount}</span>
+                                Cart {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
                             </Link>
                         </li>
                     </ul>

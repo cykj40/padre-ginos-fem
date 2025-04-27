@@ -1,66 +1,19 @@
 import { useContext } from 'react';
-import { CartContext } from './contexts';
+import { CartContext } from '../app/contexts/CartContext';
 
 const intl = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
 });
 
-export default function Cart({cart}) {
-    const [, setCart] = useContext(CartContext);
-    console.log("Cart component received cart:", cart);
+export default function Cart() {
+    const { cart, removeFromCart } = useContext(CartContext);
+    const { items = [] } = cart || {};
     
-    // Calculate total price
-    let total = 0;
-    for (let i = 0; i < cart.length; i++) {
-        try {
-            const current = cart[i];
-            if (current && current.pizza && current.pizza.sizes && current.size) {
-                const price = current.pizza.sizes[current.size];
-                if (typeof price === 'number') {
-                    total += price;
-                } else {
-                    console.warn("Invalid price for item:", current);
-                }
-            } else {
-                console.warn("Invalid cart item structure:", current);
-            }
-        } catch (error) {
-            console.error("Error processing cart item:", error);
-        }
-    }
+    // Calculate total price - this is now handled in the context
+    const total = cart?.total || 0;
     
-    // Function to remove an item from the cart
-    const removeFromCart = (index) => {
-        try {
-            const newCart = [...cart];
-            newCart.splice(index, 1);
-            setCart(newCart);
-            
-            const removeMsg = document.createElement('div');
-            removeMsg.textContent = 'Item removed from cart';
-            removeMsg.style.position = 'fixed';
-            removeMsg.style.bottom = '20px';
-            removeMsg.style.right = '20px';
-            removeMsg.style.backgroundColor = '#e74c3c';
-            removeMsg.style.color = 'white';
-            removeMsg.style.padding = '10px 20px';
-            removeMsg.style.borderRadius = '4px';
-            removeMsg.style.zIndex = '1000';
-            removeMsg.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-            document.body.appendChild(removeMsg);
-            
-            setTimeout(() => {
-                if (document.body.contains(removeMsg)) {
-                    document.body.removeChild(removeMsg);
-                }
-            }, 2000);
-        } catch (error) {
-            console.error("Error removing item from cart:", error);
-        }
-    };
-    
-    if (!cart || cart.length === 0) {
+    if (!items || items.length === 0) {
         return (
             <div className="cart">
                 <h2>Cart</h2>
@@ -79,18 +32,17 @@ export default function Cart({cart}) {
                 maxHeight: '300px',
                 overflowY: 'auto'
             }}>
-                {cart.map((item, index) => {
+                {items.map((item) => {
                     try {
-                        if (!item || !item.pizza || !item.size) {
+                        if (!item) {
                             console.warn("Invalid cart item:", item);
                             return null;
                         }
                         
-                        const price = item.pizza.sizes ? item.pizza.sizes[item.size] : null;
-                        const formattedPrice = price ? intl.format(price) : "Price unavailable";
+                        const formattedPrice = intl.format(item.price);
                         
                         return (
-                            <li key={index} style={{
+                            <li key={item.id} style={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
@@ -102,11 +54,14 @@ export default function Cart({cart}) {
                             }}>
                                 <div>
                                     <span className="size" style={{ fontWeight: 'bold' }}>{item.size}</span> - 
-                                    <span className="type" style={{ marginLeft: '5px' }}>{item.pizza.name}</span> - 
+                                    <span className="type" style={{ marginLeft: '5px' }}>{item.name}</span> - 
                                     <span className="price" style={{ color: '#e74c3c', marginLeft: '5px' }}>{formattedPrice}</span>
+                                    {item.quantity > 1 && (
+                                        <span className="quantity" style={{ marginLeft: '5px' }}>x{item.quantity}</span>
+                                    )}
                                 </div>
                                 <button 
-                                    onClick={() => removeFromCart(index)}
+                                    onClick={() => removeFromCart(item.id)}
                                     style={{
                                         background: 'none',
                                         border: 'none',

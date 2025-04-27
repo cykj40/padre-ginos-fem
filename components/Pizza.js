@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useContext } from 'react';
-import { CartContext } from '../app/contexts';
+import { CartContext } from '../app/contexts/CartContext';
 import useCurrency from '../hooks/useCurrency';
 
 // Default fallback pizza data
@@ -20,14 +20,14 @@ export default function Pizza({ pizza = DEFAULT_PIZZA, detailed = false }) {
     // Use fallback data if no pizza is provided
     const safePizza = pizza || DEFAULT_PIZZA;
 
-    const [cart, setCart] = useContext(CartContext);
+    const { addToCart } = useContext(CartContext);
     const { format } = useCurrency();
     const [added, setAdded] = useState(false);
 
     const handleAddToCart = () => {
         const newItem = {
-            id: Date.now(),
-            pizza: safePizza,
+            pizzaId: safePizza.id,
+            name: safePizza.name,
             size: 'medium',
             crust: 'regular',
             toppings: [],
@@ -35,7 +35,7 @@ export default function Pizza({ pizza = DEFAULT_PIZZA, detailed = false }) {
             price: Number(safePizza.price) || 0
         };
 
-        setCart([...cart, newItem]);
+        addToCart(newItem);
         setAdded(true);
 
         setTimeout(() => {
