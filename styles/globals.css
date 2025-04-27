@@ -150,7 +150,16 @@ select {
 
 .cart-item-image {
   width: 100px;
+  min-width: 100px;
+  height: 100px;
   margin-right: 20px;
+}
+
+.cart-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 .cart-item-content {
@@ -250,7 +259,8 @@ select {
   }
   
   .cart-item-image {
-    width: 100%;
+    width: 100px;
+    height: 100px;
     margin-right: 0;
     margin-bottom: 10px;
   }

@@ -101,8 +101,9 @@ export default function Cart() {
                                             src={'/assets/pizzas/veggie.webp'}
                                             alt={item.name || 'Pizza'}
                                             style={{
-                                                width: '100%',
-                                                height: 'auto',
+                                                width: '100px',
+                                                height: '100px',
+                                                objectFit: 'cover',
                                                 borderRadius: '8px'
                                             }}
                                         />
