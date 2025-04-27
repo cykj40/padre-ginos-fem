@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getAllPizzas } from '../../data/pizzas';
+import { config } from '../../api-config';
+
+// Export the API config
+export { config };
 
 export async function GET(request) {
     // Check for query parameters
@@ -18,7 +22,7 @@ export async function GET(request) {
     }
 
     // Add a small delay to simulate network latency (optional)
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // await new Promise(resolve => setTimeout(resolve, 300));
 
     return NextResponse.json(pizzas);
 } 

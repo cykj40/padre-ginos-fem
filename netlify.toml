@@ -4,24 +4,12 @@
 
 [build.environment]
   NODE_VERSION = "18"
-  NEXT_PUBLIC_API_URL = "https://padre-ginos-fem.onrender.com"
   NPM_FLAGS = "--legacy-peer-deps"
+  NEXT_PUBLIC_SKIP_API_ROUTES = "true"
 
-# Redirect API requests to the backend
-[[redirects]]
-  from = "/api/*"
-  to = "https://padre-ginos-fem.onrender.com/api/:splat"
-  status = 200
-  force = true
-  headers = {Access-Control-Allow-Origin = "*", Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS", Access-Control-Allow-Headers = "Content-Type, Authorization, X-Forwarded-For, X-Request-ID"}
-
-# Redirect public files to the backend
-[[redirects]]
-  from = "/public/*"
-  to = "https://padre-ginos-fem.onrender.com/public/:splat"
-  status = 200
-  force = true
-  headers = {Access-Control-Allow-Origin = "*", Cache-Control = "public, max-age=86400"}
+# Ignore Next.js API routes during static export
+[functions]
+  included_files = ["!app/api/**"]
 
 # For single-page app
 [[redirects]]
@@ -39,12 +27,4 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Forwarded-For"
-    Content-Security-Policy = """
-      default-src 'self' https://padre-ginos-fem.onrender.com;
-      img-src 'self' https://padre-ginos-fem.onrender.com data: https: http:;
-      style-src 'self' 'unsafe-inline' https: https://fonts.googleapis.com;
-      script-src 'self' 'unsafe-inline' 'unsafe-eval';
-      connect-src 'self' https://padre-ginos-fem.onrender.com;
-      font-src 'self' data: https: https://fonts.gstatic.com;
-      """ 
+    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Forwarded-For" 

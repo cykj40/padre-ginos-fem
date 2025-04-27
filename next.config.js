@@ -12,6 +12,13 @@ const nextConfig = {
     optimizeFonts: false,
     // Transpile modules
     transpilePackages: ['@tanstack/react-query'],
+    // Set output directory for build
+    distDir: 'out',
+    // Handle static paths
+    experimental: {
+        appDir: true,
+        serverActions: false,
+    },
 };
 
 module.exports = nextConfig; 
