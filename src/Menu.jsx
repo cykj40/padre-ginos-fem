@@ -132,7 +132,7 @@ export default function Menu() {
   const calculatePrice = () => {
     if (!selectedPizza) return 0;
     
-    let basePrice = selectedPizza.sizes?.[orderOptions.size] || selectedPizza.price;
+    let basePrice = selectedPizza.sizes?.[orderOptions.size] || Number(selectedPizza.price) || 0;
     
     // Extra for premium crust
     if (orderOptions.crust === 'thin') basePrice += 1;
@@ -248,13 +248,13 @@ export default function Menu() {
                   {pizza.popular && <span className="tag popular">Popular</span>}
                 </div>
                 <p className="price">
-                  {intl.format(pizza.price)}
+                  {intl.format(Number(pizza.price) || 0)}
                 </p>
                 {pizza.sizes && (
                   <div className="sizes">
                     <span>Available sizes: </span>
                     {Object.entries(pizza.sizes).map(([size, price]) => (
-                      <span key={size}>{size}: {intl.format(price)} </span>
+                      <span key={size}>{size}: {intl.format(Number(price) || 0)} </span>
                     ))}
                   </div>
                 )}
