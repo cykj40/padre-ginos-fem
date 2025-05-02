@@ -1,4 +1,10 @@
 :root {
+    --primary-color: #e63946;
+    --secondary-color: #f1faee;
+    --accent-color: #457b9d;
+    --text-color: #1d3557;
+    --background-color: #ffffff;
+    --border-color: #a8dadc;
     --primary: #da2f04;
     --secondary: #33670a;
     --background: #fffaee;
@@ -19,9 +25,336 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: var(--background);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-color);
+    background-color: var(--background-color);
     line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Header Styles */
+.header {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    padding: 1rem 0;
+}
+
+.header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    color: var(--secondary-color);
+    text-decoration: none;
+}
+
+.logo h1 {
+    font-size: 2rem;
+    margin: 0;
+}
+
+/* Navigation Styles */
+.navigation ul {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.navigation a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.navigation a:hover,
+.navigation a.active {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Footer Styles */
+.footer {
+    background-color: var(--text-color);
+    color: var(--secondary-color);
+    padding: 2rem 0;
+    margin-top: 2rem;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.footer-section h3 {
+    margin-bottom: 1rem;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Home Page Styles */
+.hero {
+    background-image: url('/images/hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    color: var(--secondary-color);
+    text-align: center;
+    padding: 4rem 0;
+    position: relative;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.hero p {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.cta-button {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    padding: 1rem 2rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    position: relative;
+}
+
+.cta-button:hover {
+    background-color: #c1121f;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 4rem 0;
+}
+
+.feature {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 8px;
+    background-color: var(--secondary-color);
+}
+
+.testimonials {
+    background-color: var(--secondary-color);
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.testimonial {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: var(--background-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Menu Page Styles */
+.menu {
+    padding: 2rem 0;
+}
+
+.pizza-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.pizza-card {
+    background-color: var(--secondary-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pizza-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.pizza-card h3 {
+    padding: 1rem;
+    margin: 0;
+}
+
+.pizza-card p {
+    padding: 0 1rem 1rem;
+}
+
+.pizza-options {
+    padding: 1rem;
+}
+
+.pizza-options div {
+    margin-bottom: 1rem;
+}
+
+.pizza-options label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.pizza-options select,
+.pizza-options input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.toppings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.5rem;
+}
+
+.topping-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pizza-card button {
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border: none;
+    border-radius: 0 0 8px 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.pizza-card button:hover {
+    background-color: #c1121f;
+}
+
+/* Cart Styles */
+.cart {
+    padding: 2rem;
+}
+
+.cart ul {
+    list-style: none;
+}
+
+.cart li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.cart-total {
+    margin-top: 2rem;
+    text-align: right;
+}
+
+.cart button {
+    padding: 0.5rem 1rem;
+    margin-left: 0.5rem;
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.cart button:hover {
+    background-color: #c1121f;
+}
+
+/* Contact Page Styles */
+.contact {
+    padding: 2rem 0;
+}
+
+.contact-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.contact-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.contact-form div {
+    margin-bottom: 1rem;
+}
+
+.contact-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.contact-form textarea {
+    height: 150px;
+    resize: vertical;
+}
+
+.contact-form button {
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.contact-form button:hover {
+    background-color: #c1121f;
 }
 
 .container {

@@ -3,135 +3,205 @@
  * This serves as our "database" for the static site
  */
 
-const pizzas = [
+export const pizzas = [
     {
         id: 'margherita',
         name: 'Margherita',
-        description: 'Classic pizza with tomato sauce, mozzarella, and basil',
-        price: 10.99,
+        description: 'Classic tomato sauce, mozzarella, and fresh basil',
         image: '/assets/pizzas/napolitana.webp',
-        ingredients: ['Tomato Sauce', 'Mozzarella', 'Basil', 'Olive Oil'],
-        vegetarian: true,
-        spicy: false,
-        popular: true,
-        sizes: {
-            S: 10.99,
-            M: 12.99,
-            L: 14.99
-        }
+        prices: {
+            small: 10,
+            medium: 15,
+            large: 20,
+        },
+        availableToppings: [
+            'Extra Cheese',
+            'Pepperoni',
+            'Mushrooms',
+            'Onions',
+            'Olives',
+        ],
     },
     {
         id: 'pepperoni',
         name: 'Pepperoni',
-        description: 'Traditional pizza topped with pepperoni and cheese',
-        price: 12.99,
+        description: 'Tomato sauce, mozzarella, and pepperoni',
         image: '/assets/pizzas/pepperoni.webp',
-        ingredients: ['Tomato Sauce', 'Mozzarella', 'Pepperoni'],
-        vegetarian: false,
-        spicy: true,
-        popular: true,
-        sizes: {
-            S: 12.99,
-            M: 14.99,
-            L: 16.99
-        }
+        prices: {
+            small: 12,
+            medium: 17,
+            large: 22,
+        },
+        availableToppings: [
+            'Extra Cheese',
+            'Mushrooms',
+            'Onions',
+            'Olives',
+            'Bell Peppers',
+        ],
     },
     {
-        id: 'veggie',
-        name: 'Veggie Supreme',
-        description: 'Loaded with fresh vegetables and cheese',
-        price: 13.99,
+        id: 'vegetarian',
+        name: 'Vegetarian',
+        description: 'Tomato sauce, mozzarella, mushrooms, onions, bell peppers, and olives',
         image: '/assets/pizzas/veggie.webp',
-        ingredients: ['Tomato Sauce', 'Mozzarella', 'Bell Peppers', 'Olives', 'Mushrooms', 'Onions'],
-        vegetarian: true,
-        spicy: false,
-        popular: false,
-        sizes: {
-            S: 13.99,
-            M: 15.99,
-            L: 17.99
-        }
+        prices: {
+            small: 13,
+            medium: 18,
+            large: 23,
+        },
+        availableToppings: [
+            'Extra Cheese',
+            'Spinach',
+            'Artichokes',
+            'Sun-dried Tomatoes',
+            'Feta Cheese',
+        ],
     },
     {
-        id: 'meat-lovers',
-        name: 'Meat Lovers',
-        description: 'Hearty pizza loaded with various meats',
-        price: 14.99,
-        image: '/assets/pizzas/big-meat.webp',
-        ingredients: ['Tomato Sauce', 'Mozzarella', 'Pepperoni', 'Sausage', 'Bacon', 'Ham'],
-        vegetarian: false,
-        spicy: true,
-        popular: true,
-        sizes: {
-            S: 14.99,
-            M: 16.99,
-            L: 18.99
-        }
+        id: 'thai',
+        name: 'Thai',
+        description: 'Peanut sauce, mozzarella, chicken, carrots, and cilantro',
+        image: '/assets/pizzas/thai.webp',
+        prices: {
+            small: 14,
+            medium: 19,
+            large: 24,
+        },
+        availableToppings: [
+            'Extra Cheese',
+            'Chicken',
+            'Carrots',
+            'Cilantro',
+            'Peanuts',
+        ],
     },
     {
-        id: 'hawaiian',
-        name: 'Hawaiian',
-        description: 'Sweet and savory pizza with ham and pineapple',
-        price: 13.99,
-        image: '/assets/pizzas/hawaiian.webp',
-        ingredients: ['Tomato Sauce', 'Mozzarella', 'Ham', 'Pineapple'],
-        vegetarian: false,
-        spicy: false,
-        popular: false,
-        sizes: {
-            S: 13.99,
-            M: 15.99,
-            L: 17.99
-        }
-    },
-    {
-        id: 'greek',
-        name: 'Greek',
-        description: 'Mediterranean inspired pizza with feta and olives',
-        price: 13.99,
-        image: '/assets/pizzas/greek.webp',
-        ingredients: ['Tomato Sauce', 'Mozzarella', 'Feta', 'Olives', 'Red Onions', 'Tomatoes'],
-        vegetarian: true,
-        spicy: false,
-        popular: false,
-        sizes: {
-            S: 13.99,
-            M: 15.99,
-            L: 17.99
-        }
-    },
-    {
-        id: 'mexican',
-        name: 'Spicy Mexican',
-        description: 'Zesty pizza with jalapeños, corn, and ground beef',
-        price: 14.99,
-        image: '/assets/pizzas/mexican.webp',
-        ingredients: ['Tomato Sauce', 'Mozzarella', 'Ground Beef', 'Jalapeños', 'Corn', 'Red Onions'],
-        vegetarian: false,
-        spicy: true,
-        popular: false,
-        sizes: {
-            S: 14.99,
-            M: 16.99,
-            L: 18.99
-        }
+        id: 'spinach',
+        name: 'Spinach',
+        description: 'White sauce, mozzarella, spinach, and garlic',
+        image: '/assets/pizzas/spinach.webp',
+        prices: {
+            small: 13,
+            medium: 18,
+            large: 23,
+        },
+        availableToppings: [
+            'Extra Cheese',
+            'Mushrooms',
+            'Onions',
+            'Tomatoes',
+            'Feta Cheese',
+        ],
     },
     {
         id: 'sicilian',
         name: 'Sicilian',
-        description: 'Thick crust pizza with rich tomato sauce and herbs',
-        price: 15.99,
+        description: 'Thick crust with tomato sauce, mozzarella, and Italian sausage',
         image: '/assets/pizzas/sicilian.webp',
-        ingredients: ['Thick Tomato Sauce', 'Mozzarella', 'Parmesan', 'Oregano', 'Basil', 'Garlic'],
-        vegetarian: true,
-        spicy: false,
-        popular: false,
-        sizes: {
-            S: 15.99,
-            M: 17.99,
-            L: 19.99
-        }
-    }
+        prices: {
+            small: 14,
+            medium: 19,
+            large: 24,
+        },
+        availableToppings: [
+            'Extra Cheese',
+            'Italian Sausage',
+            'Peppers',
+            'Onions',
+            'Mushrooms',
+        ],
+    },
+    {
+        id: 'mexican',
+        name: 'Mexican',
+        description: 'Spicy tomato sauce, mozzarella, ground beef, and jalapeños',
+        image: '/assets/pizzas/mexican.webp',
+        prices: {
+            small: 14,
+            medium: 19,
+            large: 24,
+        },
+        availableToppings: [
+            'Extra Cheese',
+            'Ground Beef',
+            'Jalapeños',
+            'Black Olives',
+            'Sour Cream',
+        ],
+    },
+    {
+        id: 'mediterraneo',
+        name: 'Mediterraneo',
+        description: 'Olive oil base, mozzarella, feta, olives, and sun-dried tomatoes',
+        image: '/assets/pizzas/mediterraneo.webp',
+        prices: {
+            small: 14,
+            medium: 19,
+            large: 24,
+        },
+        availableToppings: [
+            'Extra Cheese',
+            'Feta',
+            'Olives',
+            'Sun-dried Tomatoes',
+            'Artichokes',
+        ],
+    },
+    {
+        id: 'hawaiian',
+        name: 'Hawaiian',
+        description: 'Tomato sauce, mozzarella, ham, and pineapple',
+        image: '/assets/pizzas/hawaiian.webp',
+        prices: {
+            small: 13,
+            medium: 18,
+            large: 23,
+        },
+        availableToppings: [
+            'Extra Cheese',
+            'Ham',
+            'Pineapple',
+            'Bacon',
+            'Red Onions',
+        ],
+    },
+    {
+        id: 'greek',
+        name: 'Greek',
+        description: 'Olive oil base, mozzarella, feta, olives, and oregano',
+        image: '/assets/pizzas/greek.webp',
+        prices: {
+            small: 14,
+            medium: 19,
+            large: 24,
+        },
+        availableToppings: [
+            'Extra Cheese',
+            'Feta',
+            'Olives',
+            'Red Onions',
+            'Tomatoes',
+        ],
+    },
+    {
+        id: 'big-meat',
+        name: 'Big Meat',
+        description: 'Tomato sauce, mozzarella, pepperoni, sausage, ham, and bacon',
+        image: '/assets/pizzas/big-meat.webp',
+        prices: {
+            small: 15,
+            medium: 20,
+            large: 25,
+        },
+        availableToppings: [
+            'Extra Cheese',
+            'Pepperoni',
+            'Sausage',
+            'Ham',
+            'Bacon',
+        ],
+    },
 ];
 
 export function getAllPizzas() {

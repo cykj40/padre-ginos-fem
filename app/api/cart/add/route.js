@@ -3,7 +3,9 @@ import { addToCart } from '../../../lib/db';
 
 export async function POST(request) {
     try {
-        const { cartId, item } = await request.json();
+        // Get cartId from query string
+        const { searchParams } = new URL(request.url);
+        const cartId = searchParams.get('cartId');
 
         if (!cartId) {
             return NextResponse.json(
@@ -12,20 +14,17 @@ export async function POST(request) {
             );
         }
 
-        if (!item || !item.pizzaId || !item.name || !item.size || !item.quantity) {
-            return NextResponse.json(
-                { error: 'Invalid item data', message: 'Item must include pizzaId, name, size, and quantity' },
-                { status: 400 }
-            );
-        }
+        // Get item data from request body
+        const item = await request.json();
 
-        const cart = await addToCart(cartId, item);
+        // Add item to cart
+        const updatedCart = await addToCart(cartId, item);
 
-        return NextResponse.json(cart);
+        return NextResponse.json(updatedCart);
     } catch (error) {
         console.error('Error adding to cart:', error);
         return NextResponse.json(
-            { error: 'Failed to add item to cart', message: error.message },
+            { error: 'Failed to add to cart' },
             { status: 500 }
         );
     }
