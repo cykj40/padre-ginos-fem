@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import CartIcon from './CartIcon';
 
 export default function Navigation() {
     const pathname = usePathname();
@@ -25,6 +26,9 @@ export default function Navigation() {
                     </Link>
                 </li>
             </ul>
+            <div className="nav-cart">
+                <CartIcon />
+            </div>
         </nav>
     );
 } 

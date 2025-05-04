@@ -16,7 +16,6 @@ const intl = new Intl.NumberFormat('en-US', {
 
 export default function Cart() {
     const { cart, loading, updateCartItem, removeFromCart, clearCart } = useContext(CartContext);
-    const [checkoutLoading, setCheckoutLoading] = useState(false);
     const router = useRouter();
     const { format } = useCurrency();
 
@@ -44,25 +43,9 @@ export default function Cart() {
         }
     };
 
-    // Handle checkout
-    const handleCheckout = async () => {
-        setCheckoutLoading(true);
-
-        // In a real application, we would:
-        // 1. Collect user information
-        // 2. Process payment
-        // 3. Create order
-
-        // Simulate a delay for checkout process
-        setTimeout(() => {
-            setCheckoutLoading(false);
-
-            // Clear cart after successful checkout
-            clearCart();
-
-            // Redirect to success page (or create one)
-            router.push('/order-success');
-        }, 2000);
+    // Handle proceed to checkout
+    const handleProceedToCheckout = () => {
+        router.push('/checkout');
     };
 
     if (loading) {
@@ -176,10 +159,9 @@ export default function Cart() {
 
                                 <button
                                     className="btn checkout-btn"
-                                    onClick={handleCheckout}
-                                    disabled={checkoutLoading}
+                                    onClick={handleProceedToCheckout}
                                 >
-                                    {checkoutLoading ? 'Processing...' : 'Proceed to Checkout'}
+                                    Proceed to Checkout
                                 </button>
                             </div>
                         </div>
