@@ -2,8 +2,8 @@
 
 import { useContext } from 'react';
 import Link from 'next/link';
-import { CartContext } from '../app/contexts/CartContext';
-import useCurrency from '../hooks/useCurrency';
+import { CartContext } from '../contexts/CartContext';
+import useCurrency from '../../hooks/useCurrency';
 
 // Default fallback pizza data
 const DEFAULT_PIZZA = {

@@ -16,6 +16,9 @@
     --spacing-md: 1rem;
     --spacing-lg: 2rem;
     --container-width: 1200px;
+    --color-white: #ffffff;
+    --color-red: #e53935;
+    --color-green: #28a745;
 }
 
 * {
@@ -436,7 +439,7 @@ button:hover {
 .logo-text {
     font-family: var(--font);
     font-size: 1.8rem;
-    color: var(white);
+    color: white;
     margin-left: var(--spacing-sm);
 }
 

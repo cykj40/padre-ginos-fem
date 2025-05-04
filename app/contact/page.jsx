@@ -467,30 +467,40 @@ export default function Contact() {
                 }
                 
                 .location-card {
-                    background: white;
-                    padding: 1.5rem;
-                    border-radius: 8px;
-                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
                     display: flex;
                     align-items: flex-start;
+                    margin-bottom: 1.5rem;
+                    padding: 1rem;
+                    background-color: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                 }
                 
                 .location-icon {
-                    color: #e63946;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 40px;
+                    height: 40px;
+                    background-color: rgba(218, 47, 4, 0.1);
+                    border-radius: 50%;
                     margin-right: 1rem;
+                    color: var(--primary);
+                }
+                
+                .location-icon svg {
                     width: 24px;
                     height: 24px;
                 }
                 
                 .location-card h3 {
-                    margin: 0 0 0.5rem;
-                    color: #333;
-                    font-size: 1.2rem;
+                    font-size: 1.1rem;
+                    margin-bottom: 0.5rem;
                 }
                 
                 .location-card p {
                     margin: 0.25rem 0;
-                    color: #666;
+                    font-size: 0.95rem;
                 }
             `}</style>
         </div>
