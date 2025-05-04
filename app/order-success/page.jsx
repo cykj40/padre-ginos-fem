@@ -1,23 +1,19 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { CartContext } from '../contexts/CartContext';
 
 export default function OrderSuccess() {
-    const router = useRouter();
+    const { clearCart } = useContext(CartContext);
     
-    // If user navigates directly to this page without an order, redirect to home
+    // Ensure cart is cleared when this page loads
     useEffect(() => {
-        const hasCompletedOrder = sessionStorage.getItem('orderCompleted');
-        
-        if (!hasCompletedOrder) {
-            sessionStorage.setItem('orderCompleted', 'true');
-        }
-    }, []);
-
+        clearCart();
+    }, [clearCart]);
+    
     return (
-        <div className="success-page">
+        <div className="order-success-page">
             <div className="success-container">
                 <div className="success-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -26,35 +22,109 @@ export default function OrderSuccess() {
                     </svg>
                 </div>
                 
-                <h2>Order Confirmed!</h2>
+                <h1>Order Successful!</h1>
                 
-                <p>
-                    Thank you for your order! We've received your purchase and are preparing your delicious pizza.
-                </p>
+                <p>Thank you for your order at Papa Giorgio's Pizza!</p>
+                <p>Your delicious pizza is now being prepared with love and care.</p>
                 
                 <div className="order-details">
-                    <p>
-                        <strong>Order Number:</strong> #{Math.floor(Math.random() * 10000)}
-                    </p>
-                    <p>
-                        <strong>Estimated Delivery:</strong> 30-45 minutes
-                    </p>
+                    <p><strong>Estimated Delivery Time:</strong> 30-45 minutes</p>
+                    <p><strong>Order Number:</strong> #{Math.floor(100000 + Math.random() * 900000)}</p>
                 </div>
                 
-                <p className="delivery-note">
-                    You'll receive an email confirmation shortly with more details about your order.
-                </p>
+                <p className="follow-up">You will receive a confirmation email shortly with your order details.</p>
                 
-                <div className="success-actions">
+                <div className="action-buttons">
                     <Link href="/">
-                        <button className="btn">Return to Home</button>
+                        <button className="home-btn">Return to Home</button>
                     </Link>
                     
                     <Link href="/menu">
-                        <button className="btn">Order Again</button>
+                        <button className="menu-btn">Order More</button>
                     </Link>
                 </div>
             </div>
+            
+            <style jsx>{`
+                .order-success-page {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 2rem;
+                    min-height: 80vh;
+                }
+                
+                .success-container {
+                    max-width: 800px;
+                    text-align: center;
+                    padding: 3rem;
+                    background-color: white;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                }
+                
+                .success-icon {
+                    color: #4CAF50;
+                    margin-bottom: 1.5rem;
+                }
+                
+                h1 {
+                    font-size: 2.5rem;
+                    margin-bottom: 1.5rem;
+                    color: #333;
+                }
+                
+                p {
+                    font-size: 1.1rem;
+                    color: #666;
+                    margin-bottom: 1rem;
+                    line-height: 1.6;
+                }
+                
+                .order-details {
+                    background-color: #f9f9f9;
+                    padding: 1.5rem;
+                    border-radius: 8px;
+                    margin: 2rem 0;
+                }
+                
+                .follow-up {
+                    font-style: italic;
+                    color: #888;
+                }
+                
+                .action-buttons {
+                    display: flex;
+                    justify-content: center;
+                    gap: 1rem;
+                    margin-top: 2rem;
+                }
+                
+                button {
+                    padding: 0.8rem 1.5rem;
+                    border-radius: 4px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    border: none;
+                }
+                
+                .home-btn {
+                    background-color: #e63946;
+                    color: white;
+                }
+                
+                .menu-btn {
+                    background-color: white;
+                    color: #e63946;
+                    border: 2px solid #e63946;
+                }
+                
+                button:hover {
+                    opacity: 0.9;
+                    transform: translateY(-2px);
+                }
+            `}</style>
         </div>
     );
 } 

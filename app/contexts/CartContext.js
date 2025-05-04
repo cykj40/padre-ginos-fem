@@ -132,10 +132,10 @@ export function CartProvider({ children }) {
             if (useServerApi) {
                 // Try to add item via API
                 try {
-                    const response = await fetch(`/api/cart/add`, {
+                    const response = await fetch(`/api/cart/add?cartId=${cartId}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ cartId, item })
+                        body: JSON.stringify(item)
                     });
 
                     if (!response.ok) {
@@ -144,16 +144,11 @@ export function CartProvider({ children }) {
 
                     const data = await response.json();
 
-                    // Calculate total
-                    const total = data.items.reduce(
-                        (sum, item) => sum + (item.price * item.quantity),
-                        0
-                    );
-
+                    // Update cart with the response from the API
                     setCart({
                         id: data.id,
-                        items: data.items,
-                        total
+                        items: data.items || [],
+                        total: data.total
                     });
 
                     console.log('Item added to cart via API');
@@ -234,25 +229,24 @@ export function CartProvider({ children }) {
             if (useServerApi) {
                 // Try to remove item via API
                 try {
-                    const response = await fetch(`/api/cart/remove?itemId=${itemId}`, {
+                    console.log(`Removing item: ${itemId} from cart: ${cartId}`);
+                    const response = await fetch(`/api/cart/remove?itemId=${itemId}&cartId=${cartId}`, {
                         method: 'DELETE'
                     });
 
                     if (!response.ok) {
-                        throw new Error('Failed to remove item via API');
+                        const errorData = await response.json();
+                        console.error('Failed to remove item:', errorData);
+                        throw new Error(`Failed to remove item via API: ${errorData.error || response.statusText}`);
                     }
 
-                    // Update cart state locally without another fetch
-                    const newItems = cart.items.filter(item => item.id !== itemId);
-                    const total = newItems.reduce(
-                        (sum, item) => sum + (item.price * item.quantity),
-                        0
-                    );
+                    const updatedCart = await response.json();
 
+                    // Use the returned cart from the API
                     setCart({
-                        ...cart,
-                        items: newItems,
-                        total
+                        id: updatedCart.id,
+                        items: updatedCart.items || [],
+                        total: updatedCart.total
                     });
 
                     console.log('Item removed from cart via API');
@@ -311,32 +305,23 @@ export function CartProvider({ children }) {
             if (useServerApi) {
                 // Try to update item via API
                 try {
-                    const response = await fetch(`/api/cart/update`, {
-                        method: 'PATCH',
+                    const response = await fetch(`/api/cart/update?cartId=${cartId}&itemId=${itemId}`, {
+                        method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ itemId, updates })
+                        body: JSON.stringify(updates)
                     });
 
                     if (!response.ok) {
                         throw new Error('Failed to update item via API');
                     }
 
-                    // Update cart state locally without another fetch
-                    const newItems = cart.items.map(item =>
-                        item.id === itemId
-                            ? { ...item, ...updates }
-                            : item
-                    );
+                    const updatedCart = await response.json();
 
-                    const total = newItems.reduce(
-                        (sum, item) => sum + (item.price * item.quantity),
-                        0
-                    );
-
+                    // Use the returned cart from the API
                     setCart({
-                        ...cart,
-                        items: newItems,
-                        total
+                        id: updatedCart.id,
+                        items: updatedCart.items || [],
+                        total: updatedCart.total
                     });
 
                     console.log('Cart item updated via API');
@@ -423,9 +408,11 @@ export function CartProvider({ children }) {
                         throw new Error('Failed to clear cart via API');
                     }
 
-                    // Update cart state
+                    const emptyCart = await response.json();
+
+                    // Use the returned empty cart from the API
                     setCart({
-                        id: cartId,
+                        id: emptyCart.id,
                         items: [],
                         total: 0
                     });

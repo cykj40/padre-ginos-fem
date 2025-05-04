@@ -142,9 +142,22 @@ export async function updateCart(cartId, itemId, updates) {
 
 export async function removeFromCart(cartId, itemId) {
     try {
-        // Delete item from cart
-        db.prepare('DELETE FROM cart_items WHERE id = ? AND cart_id = ?').run(itemId, cartId);
+        console.log(`DB: Removing item ${itemId} from cart ${cartId}`);
 
+        // Check if item exists before deleting
+        const item = db.prepare('SELECT * FROM cart_items WHERE id = ? AND cart_id = ?').get(itemId, cartId);
+
+        if (!item) {
+            console.log(`DB: Item ${itemId} not found in cart ${cartId}`);
+            // Return the current cart state if item not found
+            return await getCart(cartId);
+        }
+
+        // Delete item from cart
+        const result = db.prepare('DELETE FROM cart_items WHERE id = ? AND cart_id = ?').run(itemId, cartId);
+        console.log(`DB: Delete result:`, result);
+
+        // Return updated cart
         return await getCart(cartId);
     } catch (error) {
         console.error('Error removing from cart:', error);

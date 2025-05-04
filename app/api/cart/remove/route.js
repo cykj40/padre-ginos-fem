@@ -4,16 +4,28 @@ import { removeFromCart } from '../../../lib/db';
 export async function DELETE(request) {
     try {
         const { searchParams } = new URL(request.url);
-        const itemId = Number(searchParams.get('itemId'));
+        const itemId = searchParams.get('itemId');
+        const cartId = searchParams.get('cartId');
 
-        if (!itemId || isNaN(itemId)) {
+        console.log('Remove cart params:', { cartId, itemId });
+
+        if (!itemId) {
             return NextResponse.json(
                 { error: 'Valid item ID is required' },
                 { status: 400 }
             );
         }
 
-        const result = await removeFromCart(itemId);
+        if (!cartId) {
+            return NextResponse.json(
+                { error: 'Valid cart ID is required' },
+                { status: 400 }
+            );
+        }
+
+        console.log(`Removing item ${itemId} from cart ${cartId}`);
+        const result = await removeFromCart(cartId, itemId);
+        console.log('Remove result:', result);
 
         return NextResponse.json(result);
     } catch (error) {

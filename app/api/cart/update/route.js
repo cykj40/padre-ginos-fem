@@ -1,13 +1,26 @@
 import { NextResponse } from 'next/server';
-import { updateCartItem } from '../../../lib/db';
+import { updateCart } from '../../../lib/db';
 
-export async function PATCH(request) {
+export async function PUT(request) {
     try {
-        const { itemId, updates } = await request.json();
+        // Get cartId and itemId from query string
+        const { searchParams } = new URL(request.url);
+        const cartId = searchParams.get('cartId');
+        const itemId = searchParams.get('itemId');
 
-        if (!itemId || isNaN(Number(itemId))) {
+        // Get updates from request body
+        const updates = await request.json();
+
+        if (!cartId) {
             return NextResponse.json(
-                { error: 'Valid item ID is required' },
+                { error: 'Cart ID is required' },
+                { status: 400 }
+            );
+        }
+
+        if (!itemId) {
+            return NextResponse.json(
+                { error: 'Item ID is required' },
                 { status: 400 }
             );
         }
@@ -19,7 +32,7 @@ export async function PATCH(request) {
             );
         }
 
-        const result = await updateCartItem(Number(itemId), updates);
+        const result = await updateCart(cartId, itemId, updates);
 
         return NextResponse.json(result);
     } catch (error) {

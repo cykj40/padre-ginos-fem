@@ -37,7 +37,18 @@ export default function Cart() {
     // Handle remove item
     const handleRemoveItem = async (itemId) => {
         if (confirm('Are you sure you want to remove this item?')) {
-            await removeFromCart(itemId);
+            try {
+                console.log(`Attempting to remove item: ${itemId}`);
+                const success = await removeFromCart(itemId);
+                
+                if (!success) {
+                    console.error('Failed to remove item');
+                    alert('There was a problem removing the item. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error removing item:', error);
+                alert('There was a problem removing the item. Please try again.');
+            }
         }
     };
 
@@ -148,6 +159,17 @@ export default function Cart() {
                                     Continue Shopping
                                 </button>
                             </Link>
+                            
+                            <button
+                                className="btn clear-cart"
+                                onClick={() => {
+                                    if (confirm('Are you sure you want to clear your cart?')) {
+                                        clearCart();
+                                    }
+                                }}
+                            >
+                                Clear Cart
+                            </button>
 
                             <button
                                 className="btn checkout-btn"
