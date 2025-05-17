@@ -1,11 +1,13 @@
 [build]
   command = "npm run build"
-  publish = "out"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "18"
   NPM_FLAGS = "--legacy-peer-deps"
   NEXT_PUBLIC_SKIP_API_ROUTES = "true"
+  NEXT_USE_NETLIFY_EDGE = "true"
+  NEXT_PRIVATE_TARGET = "server"
 
 # Ignore Next.js API routes during static export
 [functions]
@@ -27,4 +29,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Forwarded-For" 
+    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Forwarded-For"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs" 

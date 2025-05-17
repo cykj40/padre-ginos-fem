@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import Image from 'next/image';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { CartContext } from '../contexts/CartContext';
 
 export default function Menu() {
     const [pizzas, setPizzas] = useState([]);
@@ -15,23 +16,25 @@ export default function Menu() {
     const [toppings, setToppings] = useState([]);
     const [quantity, setQuantity] = useState(1);
     const queryClient = useQueryClient();
+    const { addToCart } = useContext(CartContext);
 
     useEffect(() => {
         const fetchPizzas = async () => {
             try {
-                const response = await fetch('/api/menu/');
+                const response = await fetch('/api/menu');
                 if (!response.ok) {
                     throw new Error('Failed to fetch menu');
                 }
                 const data = await response.json();
                 setPizzas(data);
-                setLoading(false);
-            } catch (err) {
-                setError(err.message);
+            } catch (error) {
+                console.error('Error fetching menu:', error);
+                setError(error.message);
+            } finally {
                 setLoading(false);
             }
         };
-
+        
         fetchPizzas();
     }, []);
 
@@ -57,38 +60,11 @@ export default function Menu() {
         );
     };
 
-    const addToCartMutation = useMutation({
-        mutationFn: async (item) => {
-            // Get or create cart ID from localStorage
-            let cartId = localStorage.getItem('cartId');
-            if (!cartId) {
-                cartId = `cart_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-                localStorage.setItem('cartId', cartId);
-            }
-            
-            const response = await fetch(`/api/cart/add?cartId=${cartId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(item),
-            });
-            
-            if (!response.ok) {
-                throw new Error('Failed to add to cart');
-            }
-            
-            return response.json();
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cart'] });
-            closeModal();
-        },
-    });
-
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
+        if (!selectedPizza) return;
+        
         const price = selectedPizza.prices[size];
-        addToCartMutation.mutate({
+        const item = {
             pizzaId: selectedPizza.id,
             name: selectedPizza.name,
             size,
@@ -96,7 +72,12 @@ export default function Menu() {
             quantity,
             toppings,
             price,
-        });
+        };
+        
+        const success = await addToCart(item);
+        if (success) {
+            closeModal();
+        }
     };
 
     if (loading) return <div className="loading">Loading menu...</div>;
@@ -217,9 +198,8 @@ export default function Menu() {
                             <button 
                                 className="add-to-cart-btn" 
                                 onClick={handleAddToCart}
-                                disabled={addToCartMutation.isPending}
                             >
-                                {addToCartMutation.isPending ? 'Adding...' : 'Add to Cart'}
+                                Add to Cart
                             </button>
                         </div>
                     </div>

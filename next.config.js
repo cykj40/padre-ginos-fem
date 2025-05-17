@@ -27,8 +27,25 @@ const nextConfig = {
                 crypto: false,
             };
         }
+
+        // Handle SQLite in Edge Runtime environment
+        if (isServer) {
+            if (process.env.NETLIFY) {
+                // Force using Next.js Edge Runtime on Netlify
+                config.experiments = {
+                    ...config.experiments,
+                    layers: true,
+                };
+            }
+        }
+
         return config;
     },
+
+    // Set environment variables
+    env: {
+        NETLIFY: process.env.NETLIFY || '',
+    }
 };
 
 module.exports = nextConfig; 

@@ -2,6 +2,11 @@
 
 import { createContext, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { getDatabaseConfig } from '../lib/db-config';
+
+// Get database configuration
+const dbConfig = getDatabaseConfig();
+const initialUseServerApi = !dbConfig.useInMemoryOnly;
 
 // Create the context
 export const CartContext = createContext();
@@ -29,7 +34,7 @@ function getCartId() {
 export function CartProvider({ children }) {
     const [cart, setCart] = useState({ id: null, items: [], total: 0 });
     const [loading, setLoading] = useState(true);
-    const [useServerApi, setUseServerApi] = useState(true); // Flag to control API usage
+    const [useServerApi, setUseServerApi] = useState(initialUseServerApi); // Flag to control API usage
 
     // Initialize the cart on component mount
     useEffect(() => {
